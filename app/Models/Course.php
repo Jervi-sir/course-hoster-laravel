@@ -18,11 +18,30 @@ class Course extends Model
 
     public function modules()
     {
-        return $this->hasMany(Module::class);
+        return $this->hasMany(Module::class)->orderBy('sort_order');
     }
+
 
     public function enrollments()
     {
         return $this->hasMany(Enrollement::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function lessons()
+    {
+        return $this->hasManyThrough(Lesson::class, Module::class);
+    }
+
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'enrollments')
+            ->using(Enrollement::class)
+            ->withPivot(['id', 'enrolled_at', 'expires_at', 'is_active'])
+            ->withTimestamps();
     }
 }

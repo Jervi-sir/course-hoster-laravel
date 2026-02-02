@@ -55,4 +55,40 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
+
+    /**
+     * Check if the user has a specific role.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role && $this->role->code === $role;
+    }
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollement::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function createdCourses()
+    {
+        return $this->hasMany(Course::class, 'creator_id');
+    }
+
+    public function lessonProgress()
+    {
+        return $this->hasMany(LessonProgress::class);
+    }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'enrollments')
+            ->using(Enrollement::class)
+            ->withPivot(['id', 'enrolled_at', 'expires_at', 'is_active'])
+            ->withTimestamps();
+    }
 }

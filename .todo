@@ -2,17 +2,7 @@ To keep you organized, I’ve broken this down into a granular checklist. Since 
 
 ### Phase 1: Foundation & Backend Core
 
-**Goal:** Build the "Skeleton" that holds the data.
 
-* [x] **Project Init:** Install Laravel, Breeze (React/Inertia), and initialize Shadcn UI.
-* [ ] **Database Migrations:**
-* `courses`: title, slug, description, price, status (draft/published).
-* `modules`: course_id, title, weight (for ordering).
-* `lessons`: module_id, title, content, type (video/text/quiz), weight.
-* `enrollments`: user_id, course_id, enrolled_at.
-
-
-* [ ] **Models & Relations:** Set up HasMany/BelongsTo relationships for the above.
 * [ ] **Admin Course CRUD:**
 * Create `CourseController` for basic resource actions.
 * Build a "Create Course" form using Shadcn `Form` and `Input` components.
