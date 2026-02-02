@@ -1,0 +1,98 @@
+To keep you organized, I’ve broken this down into a granular checklist. Since you're using **Laravel + Inertia + Shadcn**, this list prioritizes the "monolith" flow where the backend and frontend are tightly coupled.
+
+### Phase 1: Foundation & Backend Core
+
+**Goal:** Build the "Skeleton" that holds the data.
+
+* [x] **Project Init:** Install Laravel, Breeze (React/Inertia), and initialize Shadcn UI.
+* [ ] **Database Migrations:**
+* `courses`: title, slug, description, price, status (draft/published).
+* `modules`: course_id, title, weight (for ordering).
+* `lessons`: module_id, title, content, type (video/text/quiz), weight.
+* `enrollments`: user_id, course_id, enrolled_at.
+
+
+* [ ] **Models & Relations:** Set up HasMany/BelongsTo relationships for the above.
+* [ ] **Admin Course CRUD:**
+* Create `CourseController` for basic resource actions.
+* Build a "Create Course" form using Shadcn `Form` and `Input` components.
+
+
+* [ ] **The "Builder" UI:**
+* A single-page interface to add modules and lessons via Inertia modals.
+* *Bonus:* Add drag-and-drop ordering for lessons using `@dnd-kit/core`.
+
+
+* [ ] **Landing Page:** A public route fetching all "Published" courses and displaying them in a Shadcn `Card` grid.
+
+---
+
+### Phase 2: Payments & Gatekeeping
+
+**Goal:** Turn it into a "Member-only" experience.
+
+* [ ] **Payment Integration:**
+* Install the SDK for your chosen gateway (e.g., Stripe or Chargily).
+* Create a `CheckoutController` to handle the redirect to the payment provider.
+
+
+* [ ] **Webhook Handler:**
+* Create a route to receive payment success signals.
+* Logic: Find the user, find the course, create an entry in the `enrollments` table.
+
+
+* [ ] **Access Middleware:**
+* Create `CheckEnrollment` middleware.
+* Apply it to the `/courses/{slug}/lessons` routes to ensure the user has paid.
+
+
+* [ ] **Student Dashboard:**
+* A `/dashboard` route showing only the courses the authenticated user has purchased.
+
+
+* [ ] **Progress Tracking:**
+* Add a `completed_lessons` pivot table or a JSON column in `enrollments`.
+* Create a "Mark as Complete" button in the lesson UI.
+
+
+
+---
+
+### Phase 3: Content Hosting & Player
+
+**Goal:** High-quality delivery and final polish.
+
+* [ ] **Video Storage Setup:**
+* Configure Laravel `filesystems.php` for S3 or a similar provider.
+* Create a secure link generator (Signed URLs) so videos aren't public.
+
+
+* [ ] **The "Course Player" Layout:**
+* Build a sidebar navigation that lists all modules/lessons.
+* Build the main content area with a video player (use `video.js` or `react-player`).
+
+
+* [ ] **Lesson Content Rendering:**
+* If using Markdown, install `parsedown` (PHP) or `react-markdown`.
+* Ensure Shadcn `Typography` styles are applied to the rendered content.
+
+
+* [ ] **File Attachments:**
+* Add functionality for students to download PDF/Resource files attached to a lesson.
+
+
+* [ ] **Final Deployment:**
+* Set up Environment variables (`APP_KEY`, `DB_`, `STRIPE_`).
+* Run migrations and build production assets (`npm run build`).
+
+
+
+---
+
+### Suggested Daily Velocity
+
+* **Days 1-5:** Phase 1 (You'll spend the most time here on the "Builder" UI).
+* **Days 6-10:** Phase 2 (Focus on the Webhook reliability).
+* **Days 11-15:** Phase 3 (Video player and UI polishing).
+
+**Would you like me to write the code for the `CourseBuilder` database schema and the Eloquent relationships to get you started?**
