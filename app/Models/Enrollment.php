@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class Enrollement extends Model
+class Enrollment extends Pivot
 {
     use HasFactory;
+
+    public $incrementing = true;
 
     protected $table = 'enrollments';
     protected $guarded = [];

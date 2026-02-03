@@ -29,10 +29,13 @@ export interface User {
 export interface Course {
     id: number;
     title: string;
+    slug: string;
+    description: string | null;
     creator?: User;
     price: string;
     status: 'draft' | 'published' | 'archived';
     level: string;
+    thumbnail: string | null;
     created_at: string;
 }
 

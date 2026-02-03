@@ -75,9 +75,6 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
                                                 <Edit className="h-4 w-4" />
                                             </Link>
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive">
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))}

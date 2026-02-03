@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
-use App\Models\Enrollement;
+use App\Models\Enrollment;
 use App\Models\User;
 use Inertia\Inertia;
 
@@ -12,11 +12,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Admin/Dashboard', [
+        return Inertia::render('admin/dashboard', [
             'stats' => [
                 'totalUsers' => User::count(),
                 'totalCourses' => Course::count(),
-                'totalEnrollments' => Enrollement::count(),
+                'totalEnrollments' => Enrollment::count(),
             ],
         ]);
     }

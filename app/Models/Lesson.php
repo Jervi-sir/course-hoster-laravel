@@ -20,4 +20,8 @@ class Lesson extends Model
     {
         return $this->hasMany(LessonProgress::class);
     }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->latest();
+    }
 }

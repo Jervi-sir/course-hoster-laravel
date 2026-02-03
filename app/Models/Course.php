@@ -24,7 +24,7 @@ class Course extends Model
 
     public function enrollments()
     {
-        return $this->hasMany(Enrollement::class);
+        return $this->hasMany(Enrollment::class);
     }
 
     public function orders()
@@ -40,7 +40,7 @@ class Course extends Model
     public function students()
     {
         return $this->belongsToMany(User::class, 'enrollments')
-            ->using(Enrollement::class)
+            ->using(Enrollment::class)
             ->withPivot(['id', 'enrolled_at', 'expires_at', 'is_active'])
             ->withTimestamps();
     }

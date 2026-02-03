@@ -66,7 +66,7 @@ class User extends Authenticatable
 
     public function enrollments()
     {
-        return $this->hasMany(Enrollement::class);
+        return $this->hasMany(Enrollment::class);
     }
 
     public function orders()
@@ -87,7 +87,7 @@ class User extends Authenticatable
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'enrollments')
-            ->using(Enrollement::class)
+            ->using(Enrollment::class)
             ->withPivot(['id', 'enrolled_at', 'expires_at', 'is_active'])
             ->withTimestamps();
     }
