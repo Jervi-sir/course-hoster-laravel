@@ -8,6 +8,12 @@ export type SharedData = {
     name: string;
     auth: Auth;
     sidebarOpen: boolean;
+    flash: {
+        success: string | null;
+        error: string | null;
+        warning: string | null;
+        info: string | null;
+    };
     [key: string]: unknown;
 };
 
@@ -36,6 +42,24 @@ export interface Course {
     status: 'draft' | 'published' | 'archived';
     level: string;
     thumbnail: string | null;
+    created_at: string;
+    is_favorited?: boolean;
+    category?: {
+        id: number;
+        name: string;
+        slug: string;
+    };
+}
+
+export interface Order {
+    id: number;
+    user_id: number;
+    course_id: number;
+    course?: Course;
+    transaction_id: string;
+    amount_paid: string;
+    currency: string;
+    status: 'pending' | 'completed' | 'failed' | 'refunded';
     created_at: string;
 }
 

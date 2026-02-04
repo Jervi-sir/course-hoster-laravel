@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'password_plaintext',
         'role_id',
     ];
 
@@ -90,5 +91,15 @@ class User extends Authenticatable
             ->using(Enrollment::class)
             ->withPivot(['id', 'enrolled_at', 'expires_at', 'is_active'])
             ->withTimestamps();
+    }
+
+    public function favorites()
+    {
+        return $this->belongsToMany(Course::class, 'course_user_favorites')->withTimestamps();
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

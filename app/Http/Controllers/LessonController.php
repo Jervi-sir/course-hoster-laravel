@@ -2,20 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class LessonController extends Controller
 {
+    public function learn(Course $course)
+    {
+        $firstModule = $course->modules()->orderBy('sort_order')->first();
+
+        if (! $firstModule) {
+            return redirect()->route('courses.show', $course)->with('error', 'Course has no content.');
+        }
+
+        $firstLesson = $firstModule->lessons()->orderBy('sort_order')->first();
+
+        if (! $firstLesson) {
+            return redirect()->route('courses.show', $course)->with('error', 'Course has no content.');
+        }
+
+        return redirect()->route('lessons.show', ['course' => $course, 'lesson' => $firstLesson]);
+    }
+
     public function show(Course $course, Lesson $lesson)
     {
         $user = auth()->user();
 
         // Check Enrollment
-        if (!$user->enrollments()->where('course_id', $course->id)->where('is_active', true)->exists()) {
+        if (! $user->enrollments()->where('course_id', $course->id)->where('is_active', true)->exists()) {
             return redirect()->route('courses.show', $course)->with('error', 'You must be enrolled to view this lesson.');
         }
 
@@ -68,12 +85,12 @@ class LessonController extends Controller
             [
                 'user_id' => $user->id,
                 'lesson_id' => $lesson->id,
-                'course_id' => $lesson->module->course_id
+                'course_id' => $lesson->module->course_id,
             ]
         );
 
         // Toggle completion
-        $isCompleted = !$progress->is_completed;
+        $isCompleted = ! $progress->is_completed;
         $progress->is_completed = $isCompleted;
         $progress->completed_at = $isCompleted ? now() : null;
         $progress->save();

@@ -2,23 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Category;
 use App\Models\Course;
 use App\Models\Enrollment;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::where('status', 'published')
-            ->with(['creator'])
+        $query = Course::where('status', 'published')
+            ->with(['creator', 'category'])
             ->withCount('lessons')
-            ->latest()
-            ->paginate(12);
+            ->when($request->search, function ($q, $search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->category, function ($q, $category) {
+                $q->where('category_id', $category);
+            });
+
+        if (auth()->check()) {
+            $query->withExists(['favoritedBy as is_favorited' => function ($q) {
+                $q->where('user_id', auth()->id());
+            }]);
+        }
+
+        $courses = $query->latest()->paginate(12)->withQueryString();
+        $categories = Category::orderBy('name')->get();
 
         return Inertia::render('courses/index', [
-            'courses' => $courses
+            'courses' => $courses,
+            'categories' => $categories,
+            'filters' => $request->only(['search', 'category']),
         ]);
     }
 
@@ -28,58 +47,34 @@ class CourseController extends Controller
             abort(404);
         }
 
-        $course->load(['modules.lessons', 'creator']);
+        $course->load(['modules.lessons', 'creator', 'reviews.user']);
         $course->loadCount('lessons');
+        $course->loadAvg('reviews', 'rating');
+
+        if (auth()->check()) {
+            $course->loadExists(['favoritedBy as is_favorited' => function ($query) {
+                $query->where('user_id', auth()->id());
+            }]);
+        }
 
         // Check if enrolled
         $isEnrolled = false;
+        $canReview = false;
         if (auth()->check()) {
             $isEnrolled = Enrollment::where('user_id', auth()->id())
                 ->where('course_id', $course->id)
                 ->where('is_active', true)
                 ->exists();
+
+            if ($isEnrolled) {
+                $canReview = ! $course->reviews()->where('user_id', auth()->id())->exists();
+            }
         }
 
         return Inertia::render('courses/show', [
             'course' => $course,
-            'isEnrolled' => $isEnrolled
+            'isEnrolled' => $isEnrolled,
+            'canReview' => $canReview,
         ]);
-    }
-
-    public function learn(Course $course)
-    {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        $isEnrolled = Enrollment::where('user_id', auth()->id())
-            ->where('course_id', $course->id)
-            ->where('is_active', true)
-            ->exists();
-
-        if (!$isEnrolled) {
-            return redirect()->route('courses.show', $course);
-        }
-
-        // Ideally redirect to the last watched lesson or first lesson
-        // For now, redirect to first lesson
-        $firstLesson = $course->lessons()->orderBy('modules.sort_order')->orderBy('lessons.sort_order')->first();
-        // Note: orderBy on joined table (modules) might need explicit join if using hasManyThrough relation which performs joins, 
-        // but hasManyThrough might not join modules automatically in a way we can sort by module column without manual join.
-        // Actually hasManyThrough does join. But sort order might be tricky.
-
-        // Simpler approach: Get first module's first lesson.
-        $firstModule = $course->modules()->orderBy('sort_order')->first();
-        if (!$firstModule) {
-            return redirect()->route('courses.show', $course)->with('error', 'Course has no content.');
-        }
-
-        $firstLesson = $firstModule->lessons()->orderBy('sort_order')->first();
-
-        if (!$firstLesson) {
-            return redirect()->route('courses.show', $course)->with('error', 'Course has no content.');
-        }
-
-        return redirect()->route('lessons.show', ['course' => $course, 'lesson' => $firstLesson]);
     }
 }

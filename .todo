@@ -1,24 +1,3 @@
-
-### Phase 2: Payments & Gatekeeping
-
-**Goal:** Turn it into a "Member-only" experience.
-
-* [ ] **Payment Integration:**
-* Install the SDK for your chosen gateway (e.g., Stripe or Chargily).
-* Create a `CheckoutController` to handle the redirect to the payment provider.
-
-
-* [ ] **Webhook Handler:**
-* Create a route to receive payment success signals.
-* Logic: Find the user, find the course, create an entry in the `enrollments` table.
-
-
-* [ ] **Access Middleware:**
-* Create `CheckEnrollment` middleware.
-* Apply it to the `/courses/{slug}/lessons` routes to ensure the user has paid.
-
-
-
 ---
 
 ### Phase 3: Content Hosting & Player
@@ -28,7 +7,6 @@
 * [ ] **Video Storage Setup:**
 * Configure Laravel `filesystems.php` for S3 or a similar provider.
 * Create a secure link generator (Signed URLs) so videos aren't public.
-
 
 * [ ] **The "Course Player" Layout:**
 * Build a sidebar navigation that lists all modules/lessons.
@@ -43,80 +21,17 @@
 * [ ] **File Attachments:**
 * Add functionality for students to download PDF/Resource files attached to a lesson.
 
-
 * [ ] **Final Deployment:**
 * Set up Environment variables (`APP_KEY`, `DB_`, `STRIPE_`).
 * Run migrations and build production assets (`npm run build`).
 
-
-
 ---
-
-### Suggested Daily Velocity
-
-* **Days 1-5:** Phase 1 (You'll spend the most time here on the "Builder" UI).
-* **Days 6-10:** Phase 2 (Focus on the Webhook reliability).
-* **Days 11-15:** Phase 3 (Video player and UI polishing).
-
-**Would you like me to write the code for the `CourseBuilder` database schema and the Eloquent relationships to get you started?**
-
-- add password plaintext in user
-- 
-- 
-- # Student Side - Implementation Status & Todo
-
-## ✅ Completed Features
-1. **Student Dashboard (`/dashboard`)**
-   - Shows enrolled courses.
-   - Calculates and displays progress percentage.
-   - Separate tabs/sections for "In Progress" vs "Completed" (Basic list implemented).
-
-2. **Course Marketplace (`/courses`)**
-   - Public listing of all `published` courses.
-   - Course cards with thumbnails, price, and level.
-   - Pagination.
-
-3. **Enrollment System**
-   - Course Details Page (`/courses/{slug}`) with curriculum preview.
-   - "Enroll Now" button with simulated payment processing.
-   - Creation of `Enrollment` and `Order` records in database.
-
-4. **Learning Experience (`/courses/{course}/lessons/{lesson}`)**
-   - Dedicated learning interface with Sidebar navigation.
-   - Video Player (YouTube & Direct URL support).
-   - "Mark as Complete" functionality requiring enrollment.
-   - **Discussion System**: Comments section on each lesson.
-
-5. **Profile Management**
-   - Standard Laravel/Inertia profile editing via `/settings/profile` (Name, Email, Password, etc.).
-
----
-
-## 🚀 To Do List (Next Steps)
-
-### 1. User Experience & Feedback
-- [ ] **Flash Messages (Toasts)**: The backend sends `with('success', ...)` but the frontend layout doesn't seem to have a Toast notification component hooked up to receive these Inertia flash props.
-- [ ] **Empty States**: Better empty states for "My Courses" (Basic one exists) and "Discussion".
-
-### 2. Marketplace Enhancements
-- [ ] **Search & Filtering**: Add search bar and category filters to `/courses`.
-- [ ] **Reviews/Ratings**: Allow students to rate courses after completion.
-
-### 3. Student Features
-- [ ] **Purchase History**: A dedicated page to view past orders/invoices.
-- [ ] **Certificate of Completion**: Generate a PDF or simple view when course progress hits 100%.
-- [ ] **Favorites/Wishlist**: Save courses for later without enrolling.
 
 ### 4. Learning Interface Improvements
 - [ ] **Quiz Support**: `lessons` table has `type=quiz`, but current view only supports Video/Text.
 - [ ] **Resources/Attachments**: Support for downloading file attachments (`type=file`).
 - [ ] **Prev/Next Navigation**: "Next Lesson" button at the bottom of the lesson content to auto-advance.
 
-### 5. Backend / Admin
-- [ ] **Instructor Dashboard**: If "Creators" are distinct from Admins, they need a way to track their students' progress.
-- [ ] **email Notifications**: Welcome emails on enrollment, or "New Comment" notifications.
-
 ## 🛠 Tech Debt / Refactoring
 - [ ] **Optimized Queries**: Ensure `LessonController` queries scale well with large courses (currently loading comments and progress in separate queries).
 - [ ] **Mobile Responsiveness**: Verify the learning sidebar works smoothly on mobile (Toggle added, verify UX).
-

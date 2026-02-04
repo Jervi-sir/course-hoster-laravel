@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';
+import { MessageSquareDashed } from 'lucide-react';
 
 interface User {
     id: number;
@@ -101,8 +102,8 @@ export default function LessonShow({ course, lesson, isCompleted }: LessonShowPr
                                             <Link
                                                 href={`/courses/${course.slug}/lessons/${l.slug}`}
                                                 className={`flex items-center gap-2 p-2 rounded-md text-sm transition-colors ${l.id === lesson.id
-                                                        ? 'bg-primary text-primary-foreground'
-                                                        : 'hover:bg-muted text-foreground'
+                                                    ? 'bg-primary text-primary-foreground'
+                                                    : 'hover:bg-muted text-foreground'
                                                     }`}
                                             >
                                                 {l.is_completed ? (
@@ -167,8 +168,8 @@ export default function LessonShow({ course, lesson, isCompleted }: LessonShowPr
                                 onClick={handleComplete}
                                 disabled={processingComplete}
                                 className={`px-6 py-3 rounded-md font-medium transition-colors ${isCompleted
-                                        ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
-                                        : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                    ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
+                                    : 'bg-primary text-primary-foreground hover:bg-primary/90'
                                     }`}
                             >
                                 {isCompleted ? 'Completed ✓' : 'Mark as Complete'}
@@ -228,7 +229,15 @@ export default function LessonShow({ course, lesson, isCompleted }: LessonShowPr
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-muted-foreground text-center py-6">No comments yet. Be the first to start the discussion!</p>
+                                    <div className="flex flex-col items-center justify-center py-12 rounded-lg border border-dashed border-border/60 bg-muted/10">
+                                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                                            <MessageSquareDashed className="h-6 w-6 text-muted-foreground" />
+                                        </div>
+                                        <h3 className="text-base font-medium text-foreground mb-1">No comments yet</h3>
+                                        <p className="text-sm text-muted-foreground text-center max-w-xs">
+                                            Be the first to share your thoughts or ask a question about this lesson.
+                                        </p>
+                                    </div>
                                 )}
                             </div>
                         </div>

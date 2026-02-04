@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\Models\Course;
+use Illuminate\Http\Request;
 
 class EnrollmentController extends Controller
 {
@@ -21,11 +20,11 @@ class EnrollmentController extends Controller
         // Fake Payment & Order
         $user->orders()->create([
             'course_id' => $course->id,
-            'transaction_id' => 'tx_' . uniqid(),
+            'transaction_id' => 'tx_'.uniqid(),
             'amount_paid' => $course->price ?? 0,
             'currency' => 'USD',
             'status' => 'completed',
-            'payment_method' => 'card_fake'
+            'payment_method' => 'card_fake',
         ]);
 
         // Create Enrollment
@@ -33,6 +32,8 @@ class EnrollmentController extends Controller
             'course_id' => $course->id,
             'is_active' => true,
         ]);
+
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\WelcomeEmail($course, $user));
 
         return redirect()->route('dashboard')->with('success', 'Enrolled successfully!');
     }

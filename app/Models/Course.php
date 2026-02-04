@@ -21,7 +21,6 @@ class Course extends Model
         return $this->hasMany(Module::class)->orderBy('sort_order');
     }
 
-
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
@@ -43,5 +42,20 @@ class Course extends Model
             ->using(Enrollment::class)
             ->withPivot(['id', 'enrolled_at', 'expires_at', 'is_active'])
             ->withTimestamps();
+    }
+
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'course_user_favorites')->withTimestamps();
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

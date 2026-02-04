@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\Models\Lesson;
+use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
@@ -12,10 +11,16 @@ class CommentController extends Controller
     {
         $request->validate(['content' => 'required|string']);
 
-        $lesson->comments()->create([
+        $comment = $lesson->comments()->create([
             'user_id' => auth()->id(),
-            'content' => $request->content
+            'content' => $request->content,
         ]);
+
+        // Notify Creator
+        $creator = $lesson->module->course->creator;
+        if ($creator && $creator->id !== auth()->id()) {
+            \Illuminate\Support\Facades\Mail::to($creator->email)->send(new \App\Mail\NewCommentNotification($comment));
+        }
 
         return back();
     }
