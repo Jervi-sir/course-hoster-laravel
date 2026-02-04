@@ -12,10 +12,15 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::where('creator_id', auth()->id())
+        $query = Course::query()
             ->withCount(['modules', 'lessons', 'students'])
-            ->latest()
-            ->paginate(10);
+            ->latest();
+
+        if (! auth()->user()->hasRole('admin')) {
+            $query->where('creator_id', auth()->id());
+        }
+
+        $courses = $query->paginate(10);
 
         return Inertia::render('Instructor/Courses/Index', [
             'courses' => $courses,
@@ -47,8 +52,10 @@ class CourseController extends Controller
 
     public function builder(Course $course)
     {
-        // Ensure the authenticated user owns this course
-        abort_unless($course->creator_id === auth()->id(), 403);
+        // Ensure the authenticated user owns this course or is admin
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
 
         $course->load(['modules.lessons']);
 
@@ -59,7 +66,9 @@ class CourseController extends Controller
 
     public function edit(Course $course)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
 
         return Inertia::render('Instructor/Courses/Edit', [
             'course' => $course,
@@ -68,7 +77,9 @@ class CourseController extends Controller
 
     public function update(StoreCourseRequest $request, Course $course)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
 
         $data = $request->validated();
 
@@ -88,7 +99,9 @@ class CourseController extends Controller
 
     public function destroy(Course $course)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
 
         $course->delete();
 

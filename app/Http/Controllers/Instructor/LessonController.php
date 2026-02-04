@@ -13,7 +13,9 @@ class LessonController extends Controller
 {
     public function store(StoreLessonRequest $request, Course $course, Module $module)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
         abort_unless($module->course_id === $course->id, 404);
 
         $data = $request->validated();
@@ -37,7 +39,9 @@ class LessonController extends Controller
 
     public function update(StoreLessonRequest $request, Course $course, Module $module, Lesson $lesson)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
         abort_unless($module->course_id === $course->id, 404);
         abort_unless($lesson->module_id === $module->id, 404);
 
@@ -61,7 +65,9 @@ class LessonController extends Controller
 
     public function destroy(Course $course, Module $module, Lesson $lesson)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
         abort_unless($module->course_id === $course->id, 404);
         abort_unless($lesson->module_id === $module->id, 404);
 
@@ -72,7 +78,9 @@ class LessonController extends Controller
 
     public function reorder(Course $course, Module $module)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
         abort_unless($module->course_id === $course->id, 404);
 
         $order = request()->validate([

@@ -48,7 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Instructor Routes
-Route::middleware(['auth', 'verified'])->prefix('instructor')->as('instructor.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:instructor,admin'])->prefix('instructor')->as('instructor.')->group(function () {
     // Course Management
     Route::get('/courses', [\App\Http\Controllers\Instructor\CourseController::class, 'index'])->name('courses.index');
     Route::get('/courses/create', [\App\Http\Controllers\Instructor\CourseController::class, 'create'])->name('courses.create');
@@ -74,7 +74,6 @@ Route::middleware(['auth', 'verified'])->prefix('instructor')->as('instructor.')
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-    Route::resource('courses', \App\Http\Controllers\Admin\CourseController::class);
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

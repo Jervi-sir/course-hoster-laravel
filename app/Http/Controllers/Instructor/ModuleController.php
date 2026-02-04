@@ -11,7 +11,9 @@ class ModuleController extends Controller
 {
     public function store(StoreModuleRequest $request, Course $course)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
 
         $data = $request->validated();
         $data['course_id'] = $course->id;
@@ -26,7 +28,9 @@ class ModuleController extends Controller
 
     public function update(StoreModuleRequest $request, Course $course, Module $module)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
         abort_unless($module->course_id === $course->id, 404);
 
         $module->update($request->validated());
@@ -36,7 +40,9 @@ class ModuleController extends Controller
 
     public function destroy(Course $course, Module $module)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
         abort_unless($module->course_id === $course->id, 404);
 
         $module->delete();
@@ -46,7 +52,9 @@ class ModuleController extends Controller
 
     public function reorder(Course $course)
     {
-        abort_unless($course->creator_id === auth()->id(), 403);
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
 
         $order = request()->validate([
             'modules' => 'required|array',
