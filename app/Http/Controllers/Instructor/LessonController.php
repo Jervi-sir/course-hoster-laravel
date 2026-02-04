@@ -3,22 +3,35 @@
 namespace App\Http\Controllers\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\StoreLessonRequest;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Module;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class LessonController extends Controller
 {
-    public function store(StoreLessonRequest $request, Course $course, Module $module)
+    public function store(Request $request, Course $course, Module $module)
     {
         if (! auth()->user()->hasRole('admin')) {
             abort_unless($course->creator_id === auth()->id(), 403);
         }
         abort_unless($module->course_id === $course->id, 404);
 
-        $data = $request->validated();
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'in:video,article,quiz,file'],
+            'content' => ['nullable', 'string'],
+            'video' => ['nullable', 'file', 'mimes:mp4,mov,avi,wmv', 'max:1048576'], // 1GB max
+            'video_url' => ['nullable', 'string'],
+            'duration_minutes' => ['nullable', 'integer', 'min:0'],
+            'is_preview' => ['nullable', 'boolean'],
+        ], [
+            'title.required' => 'Please provide a lesson title.',
+            'type.required' => 'Please select a lesson type.',
+            'video.mimes' => 'Video must be in MP4, MOV, AVI, or WMV format.',
+            'video.max' => 'Video size cannot exceed 100MB.',
+        ]);
         $data['module_id'] = $module->id;
         $data['slug'] = Str::slug($data['title']);
 
@@ -37,7 +50,7 @@ class LessonController extends Controller
         return back()->with('success', 'Lesson added successfully.');
     }
 
-    public function update(StoreLessonRequest $request, Course $course, Module $module, Lesson $lesson)
+    public function update(Request $request, Course $course, Module $module, Lesson $lesson)
     {
         if (! auth()->user()->hasRole('admin')) {
             abort_unless($course->creator_id === auth()->id(), 403);
@@ -45,7 +58,20 @@ class LessonController extends Controller
         abort_unless($module->course_id === $course->id, 404);
         abort_unless($lesson->module_id === $module->id, 404);
 
-        $data = $request->validated();
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'in:video,article,quiz,file'],
+            'content' => ['nullable', 'string'],
+            'video' => ['nullable', 'file', 'mimes:mp4,mov,avi,wmv', 'max:1048576'], // 1GB max
+            'video_url' => ['nullable', 'string'],
+            'duration_minutes' => ['nullable', 'integer', 'min:0'],
+            'is_preview' => ['nullable', 'boolean'],
+        ], [
+            'title.required' => 'Please provide a lesson title.',
+            'type.required' => 'Please select a lesson type.',
+            'video.mimes' => 'Video must be in MP4, MOV, AVI, or WMV format.',
+            'video.max' => 'Video size cannot exceed 100MB.',
+        ]);
 
         if ($lesson->title !== $data['title']) {
             $data['slug'] = Str::slug($data['title']);

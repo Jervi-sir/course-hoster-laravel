@@ -3,19 +3,23 @@
 namespace App\Http\Controllers\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\StoreModuleRequest;
 use App\Models\Course;
 use App\Models\Module;
+use Illuminate\Http\Request;
 
 class ModuleController extends Controller
 {
-    public function store(StoreModuleRequest $request, Course $course)
+    public function store(Request $request, Course $course)
     {
         if (! auth()->user()->hasRole('admin')) {
             abort_unless($course->creator_id === auth()->id(), 403);
         }
 
-        $data = $request->validated();
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+        ], [
+            'title.required' => 'Please provide a module title.',
+        ]);
         $data['course_id'] = $course->id;
 
         // Auto-increment sort_order
@@ -26,14 +30,20 @@ class ModuleController extends Controller
         return back()->with('success', 'Module added successfully.');
     }
 
-    public function update(StoreModuleRequest $request, Course $course, Module $module)
+    public function update(Request $request, Course $course, Module $module)
     {
         if (! auth()->user()->hasRole('admin')) {
             abort_unless($course->creator_id === auth()->id(), 403);
         }
         abort_unless($module->course_id === $course->id, 404);
 
-        $module->update($request->validated());
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+        ], [
+            'title.required' => 'Please provide a module title.',
+        ]);
+
+        $module->update($data);
 
         return back()->with('success', 'Module updated successfully.');
     }

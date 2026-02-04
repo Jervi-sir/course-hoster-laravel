@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin-layout';
 import {
     Table,
@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Eye, Trash2 } from 'lucide-react';
+import { Edit, Eye, Trash2, Hammer } from 'lucide-react';
 import { PaginatedResponse, Course } from '@/types';
 
 interface CoursesIndexProps {
@@ -70,10 +70,27 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
                                                 <Eye className="h-4 w-4" />
                                             </Link>
                                         </Button>
-                                        <Button variant="ghost" size="icon" asChild>
+                                        <Button variant="ghost" size="icon" asChild title="Course Builder">
+                                            <Link href={`/admin/courses/${course.id}/builder`}>
+                                                <Hammer className="h-4 w-4" />
+                                            </Link>
+                                        </Button>
+                                        <Button variant="ghost" size="icon" asChild title="Edit Course">
                                             <Link href={`/admin/courses/${course.id}/edit`}>
                                                 <Edit className="h-4 w-4" />
                                             </Link>
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-red-500"
+                                            onClick={() => {
+                                                if (confirm('Are you sure you want to delete this course?')) {
+                                                    router.delete(`/admin/courses/${course.id}`);
+                                                }
+                                            }}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </TableCell>
                                 </TableRow>

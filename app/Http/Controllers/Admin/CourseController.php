@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Instructor;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
@@ -12,24 +12,19 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $query = Course::query()
+        $courses = Course::query()
             ->withCount(['modules', 'lessons', 'students'])
-            ->latest();
+            ->latest()
+            ->paginate(10);
 
-        if (! auth()->user()->hasRole('admin')) {
-            $query->where('creator_id', auth()->id());
-        }
-
-        $courses = $query->paginate(10);
-
-        return Inertia::render('instructor/courses/index', [
+        return Inertia::render('admin/courses/index', [
             'courses' => $courses,
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('instructor/courses/create');
+        return Inertia::render('admin/courses/create');
     }
 
     public function store(Request $request)
@@ -41,17 +36,11 @@ class CourseController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'level' => ['required', 'in:beginner,intermediate,advanced'],
             'status' => ['nullable', 'in:draft,published,archived'],
-        ], [
-            'title.required' => 'Please provide a course title.',
-            'price.required' => 'Please set a price for the course.',
-            'price.min' => 'Price cannot be negative.',
-            'level.required' => 'Please select a difficulty level.',
-            'thumbnail.image' => 'Thumbnail must be an image file.',
-            'thumbnail.max' => 'Thumbnail size cannot exceed 2MB.',
         ]);
+
         $data['slug'] = Str::slug($data['title']);
         $data['creator_id'] = auth()->id();
-        $data['status'] = 'draft'; // Always start as draft
+        $data['status'] = $request->input('status', 'draft');
 
         if ($request->hasFile('thumbnail')) {
             $data['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
@@ -59,42 +48,56 @@ class CourseController extends Controller
 
         $course = Course::create($data);
 
-        // Redirect to course builder to add modules and lessons
-        return redirect()->route('instructor.courses.builder', $course)
+        return redirect()->route('admin.courses.builder', $course)
             ->with('success', 'Course created! Now add modules and lessons.');
     }
 
     public function builder(Course $course)
     {
-        // Ensure the authenticated user owns this course or is admin
-        if (! auth()->user()->hasRole('admin')) {
-            abort_unless($course->creator_id === auth()->id(), 403);
-        }
-
         $course->load(['modules.lessons']);
 
-        return Inertia::render('instructor/courses/builder', [
+        return Inertia::render('admin/courses/builder', [
             'course' => $course,
+        ]);
+    }
+
+    public function show(Course $course)
+    {
+        $course->load('creator');
+
+        $totalLessons = $course->lessons()->count();
+
+        $students = $course->students()
+            ->withPivot('enrolled_at')
+            ->select('users.*')
+            ->paginate(10)
+            ->through(function ($student) use ($course) {
+                $student->completed_lessons_count = $student->lessonProgress()
+                    ->whereHas('lesson.module', function ($q) use ($course) {
+                        $q->where('course_id', $course->id);
+                    })
+                    ->where('completed', true)
+                    ->count();
+
+                return $student;
+            });
+
+        return Inertia::render('admin/courses/show', [
+            'course' => $course,
+            'students' => $students,
+            'totalLessons' => $totalLessons,
         ]);
     }
 
     public function edit(Course $course)
     {
-        if (! auth()->user()->hasRole('admin')) {
-            abort_unless($course->creator_id === auth()->id(), 403);
-        }
-
-        return Inertia::render('instructor/courses/edit', [
+        return Inertia::render('admin/courses/edit', [
             'course' => $course,
         ]);
     }
 
     public function update(Request $request, Course $course)
     {
-        if (! auth()->user()->hasRole('admin')) {
-            abort_unless($course->creator_id === auth()->id(), 403);
-        }
-
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -102,13 +105,6 @@ class CourseController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'level' => ['required', 'in:beginner,intermediate,advanced'],
             'status' => ['nullable', 'in:draft,published,archived'],
-        ], [
-            'title.required' => 'Please provide a course title.',
-            'price.required' => 'Please set a price for the course.',
-            'price.min' => 'Price cannot be negative.',
-            'level.required' => 'Please select a difficulty level.',
-            'thumbnail.image' => 'Thumbnail must be an image file.',
-            'thumbnail.max' => 'Thumbnail size cannot exceed 2MB.',
         ]);
 
         if ($course->title !== $data['title']) {
@@ -121,19 +117,15 @@ class CourseController extends Controller
 
         $course->update($data);
 
-        return redirect()->route('instructor.courses.index')
+        return redirect()->route('admin.courses.index')
             ->with('success', 'Course updated successfully.');
     }
 
     public function destroy(Course $course)
     {
-        if (! auth()->user()->hasRole('admin')) {
-            abort_unless($course->creator_id === auth()->id(), 403);
-        }
-
         $course->delete();
 
-        return redirect()->route('instructor.courses.index')
+        return redirect()->route('admin.courses.index')
             ->with('success', 'Course deleted successfully.');
     }
 }

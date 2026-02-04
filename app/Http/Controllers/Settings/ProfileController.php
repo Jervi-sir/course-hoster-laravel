@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Concerns\PasswordValidationRules;
+use App\Concerns\ProfileValidationRules;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\ProfileDeleteRequest;
-use App\Http\Requests\Settings\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +14,9 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    use PasswordValidationRules;
+    use ProfileValidationRules;
+
     /**
      * Show the user's profile settings page.
      */
@@ -28,9 +31,11 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validate($this->profileRules($request->user()->id));
+
+        $request->user()->fill($validated);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
@@ -44,8 +49,12 @@ class ProfileController extends Controller
     /**
      * Delete the user's profile.
      */
-    public function destroy(ProfileDeleteRequest $request): RedirectResponse
+    public function destroy(Request $request): RedirectResponse
     {
+        $request->validate([
+            'password' => $this->currentPasswordRules(),
+        ]);
+
         $user = $request->user();
 
         Auth::logout();
