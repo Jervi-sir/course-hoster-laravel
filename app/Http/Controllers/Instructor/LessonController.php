@@ -8,6 +8,7 @@ use App\Models\Lesson;
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Jobs\ProcessHlsVideo;
 
 class LessonController extends Controller
 {
@@ -39,13 +40,19 @@ class LessonController extends Controller
         $data['sort_order'] = $module->lessons()->max('sort_order') + 1;
 
         // Handle video upload if provided
+        $videoPath = null;
         if ($request->hasFile('video')) {
-            $data['video_url'] = $request->file('video')->store('courses/videos', 'public');
-            $data['video_provider'] = 's3';
+            $videoPath = $request->file('video')->store('courses/videos', 'public');
+            $data['video_url'] = route('video.stream', ['path' => $videoPath]);
+            $data['video_provider'] = 'local';
             unset($data['video']); // Remove the file from data array
         }
 
         $lesson = Lesson::create($data);
+
+        if ($videoPath) {
+            ProcessHlsVideo::dispatch($lesson, $videoPath);
+        }
 
         return back()->with('success', 'Lesson added successfully.');
     }
@@ -78,13 +85,19 @@ class LessonController extends Controller
         }
 
         // Handle video upload if provided
+        $videoPath = null;
         if ($request->hasFile('video')) {
-            $data['video_url'] = $request->file('video')->store('courses/videos', 'public');
-            $data['video_provider'] = 's3';
+            $videoPath = $request->file('video')->store('courses/videos', 'public');
+            $data['video_url'] = route('video.stream', ['path' => $videoPath]);
+            $data['video_provider'] = 'local';
             unset($data['video']); // Remove the file from data array
         }
 
         $lesson->update($data);
+
+        if ($videoPath) {
+            ProcessHlsVideo::dispatch($lesson, $videoPath);
+        }
 
         return back()->with('success', 'Lesson updated successfully.');
     }

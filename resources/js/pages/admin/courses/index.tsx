@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import AdminLayout from '@/pages/admin/admin-layout';
 import {
     Table,
     TableBody,
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Eye, Trash2, Hammer } from 'lucide-react';
 import { PaginatedResponse, Course } from '@/types';
+import Pagination from '@/components/pagination';
 
 interface CoursesIndexProps {
     courses: PaginatedResponse<Course>;
@@ -98,6 +99,7 @@ export default function CoursesIndex({ courses }: CoursesIndexProps) {
                         </TableBody>
                     </Table>
                 </div>
+                <Pagination links={courses.links} />
             </div>
         </AdminLayout>
     );

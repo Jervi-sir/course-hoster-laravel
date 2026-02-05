@@ -11,9 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->timestamps();
+        });
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
@@ -49,6 +56,30 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['module_id', 'slug']); // SEO stability
+        });
+
+        Schema::create('comments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('lesson_id')->constrained()->cascadeOnDelete();
+            $table->text('content');
+            $table->timestamps();
+        });
+        Schema::create('course_user_favorites', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['user_id', 'course_id']);
+        });
+        Schema::create('reviews', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('course_id')->constrained()->cascadeOnDelete();
+            $table->integer('rating');
+            $table->text('comment')->nullable();
+            $table->timestamps();
         });
     }
 

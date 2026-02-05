@@ -1,5 +1,58 @@
----
 
+- register as student
+- login as student
+- navigate on courses
+- preview course landing page
+- see the modules of the course
+- see the lessons list of the course
+- purchase the course
+- take me to checkout
+- show its purchased
+- show purchased courses
+- show the course
+- show the modules
+- show the lessons
+- comment on the lesson
+- mark progress
+- general landing page
+- 
+- login as instructor
+- create course
+- create module
+- create lesson
+- upload video
+- upload resource
+- create quiz
+- create question
+- create answer
+- create comment
+- mark progress
+- see student that enrolled in my course
+- see student progress
+- see their progress on the course
+
+- admin login
+- admin dashboard
+- admin can see all courses
+- admin can see all students
+- admin can see all instructors
+- admin can delete courses
+- admin can delete students
+- admin can delete instructors
+- admin can edit courses
+- admin can edit students
+- admin can edit instructors
+- admin can create courses
+- admin can create students
+- admin can create instructors
+
+
+
+
+
+
+
+---
 ### Phase 3: Content Hosting & Player
 
 **Goal:** High-quality delivery and final polish.

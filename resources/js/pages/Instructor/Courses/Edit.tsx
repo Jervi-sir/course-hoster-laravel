@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import InstructorLayout from '@/pages/instructor/instructor-layout';
 import { Upload } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
 
@@ -41,7 +41,7 @@ export default function Edit({ course }: EditProps) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <InstructorLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit: ${course.title}`} />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6 max-w-4xl mx-auto">
                 <div>
@@ -214,6 +214,6 @@ export default function Edit({ course }: EditProps) {
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </InstructorLayout>
     );
 }

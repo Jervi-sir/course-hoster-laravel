@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import InstructorLayout from './instructor-layout';
 import type { Course, User } from '@/types';
 import { Users } from 'lucide-react';
 
@@ -18,7 +18,7 @@ interface Props {
 
 export default function InstructorDashboard({ courses }: Props) {
     return (
-        <AppLayout breadcrumbs={[{ title: 'Instructor Dashboard', href: '/instructor/dashboard' }]}>
+        <InstructorLayout breadcrumbs={[{ title: 'Instructor Dashboard', href: '/instructor/dashboard' }]}>
             <Head title="Instructor Dashboard" />
             <div className="flex flex-col gap-6 p-4">
                 <div className="flex items-center justify-between">
@@ -73,6 +73,6 @@ export default function InstructorDashboard({ courses }: Props) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </InstructorLayout>
     );
 }

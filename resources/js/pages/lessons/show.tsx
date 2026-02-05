@@ -2,6 +2,10 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';
 import { MessageSquareDashed } from 'lucide-react';
+import { MediaPlayer, MediaProvider } from '@vidstack/react';
+import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default';
+import '@vidstack/react/player/styles/default/theme.css';
+import '@vidstack/react/player/styles/default/layouts/video.css';
 
 interface User {
     id: number;
@@ -28,6 +32,8 @@ interface Lesson {
     duration_minutes: number;
     sort_order: number;
     is_completed?: boolean;
+    video_hls_path?: string;
+    video_processing_status?: 'pending' | 'processing' | 'completed' | 'failed';
     comments?: Comment[];
 }
 
@@ -136,17 +142,42 @@ export default function LessonShow({ course, lesson, isCompleted }: LessonShowPr
 
                     <div className="flex-1 overflow-y-auto p-4 md:p-8 max-w-4xl mx-auto w-full">
                         {/* Video Player */}
-                        {lesson.type === 'video' && lesson.video_url && (
+                        {lesson.type === 'video' && (
                             <div className="aspect-video bg-black rounded-lg overflow-hidden shadow-lg mb-8">
-                                {isYoutube ? (
-                                    <iframe
-                                        src={`https://www.youtube.com/embed/${lesson.video_url.split('v=')[1] || lesson.video_url.split('/').pop()}`}
-                                        className="w-full h-full"
-                                        allowFullScreen
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    />
+                                {lesson.video_processing_status === 'processing' || lesson.video_processing_status === 'pending' ? (
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-white bg-gray-900">
+                                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white mb-4"></div>
+                                        <p>Processing Video...</p>
+                                        <p className="text-xs text-gray-400 mt-2">This may take a few minutes.</p>
+                                    </div>
                                 ) : (
-                                    <video src={lesson.video_url} controls className="w-full h-full" />
+                                    (lesson.video_url || lesson.video_hls_path) ? (
+                                        <div
+                                            className='w-full h-full'
+                                            onContextMenu={(e) => e.preventDefault()} // Prevent context menu
+                                        >
+                                            <MediaPlayer
+                                                title={lesson.title}
+                                                src={lesson.video_hls_path && lesson.video_processing_status === 'completed'
+                                                    ? `/storage/${lesson.video_hls_path}`
+                                                    : lesson.video_url
+                                                }
+                                                viewType="video"
+                                                streamType="on-demand"
+                                                logLevel="warn"
+                                                crossOrigin
+                                                playsInline
+                                                className="w-full h-full aspect-video bg-black rounded-lg overflow-hidden"
+                                            >
+                                                <MediaProvider />
+                                                <DefaultVideoLayout icons={defaultLayoutIcons} />
+                                            </MediaPlayer>
+                                        </div>
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-white bg-gray-800">
+                                            Video source not available
+                                        </div>
+                                    )
                                 )}
                             </div>
                         )}

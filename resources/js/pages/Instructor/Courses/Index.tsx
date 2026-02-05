@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import InstructorLayout from '@/pages/instructor/instructor-layout';
 import { Plus, BookOpen, Users, Video, Edit, Trash2 } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
 
@@ -38,7 +38,7 @@ interface IndexProps {
 
 export default function Index({ courses }: IndexProps) {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <InstructorLayout breadcrumbs={breadcrumbs}>
             <Head title="My Courses" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
                 {/* Header */}
@@ -78,101 +78,104 @@ export default function Index({ courses }: IndexProps) {
                     </div>
                 ) : (
                     <>
-                        <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+                        <div className="flex flex-col gap-4">
                             {courses.data.map((course) => (
                                 <div
                                     key={course.id}
-                                    className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
+                                    className="group relative flex flex-col sm:flex-row overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
                                 >
-                                    {/* Thumbnail */}
-                                    <div className="aspect-video w-full overflow-hidden bg-muted relative">
+                                    {/* Thumbnail - Left Side */}
+                                    <div className="w-full sm:w-64 aspect-video sm:aspect-auto relative shrink-0">
                                         {course.thumbnail ? (
                                             <img
                                                 src={course.thumbnail}
                                                 alt={course.title}
-                                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                className="h-full w-full object-cover"
                                             />
                                         ) : (
-                                            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                                                <BookOpen className="h-16 w-16" />
+                                            <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+                                                <BookOpen className="h-12 w-12" />
                                             </div>
                                         )}
                                         {/* Status Badge */}
-                                        <span className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-semibold ${course.status === 'published'
-                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                                : course.status === 'archived'
-                                                    ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
-                                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                        <span className={`absolute top-2 left-2 px-2 py-1 rounded-md text-xs font-semibold ${course.status === 'published'
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                            : course.status === 'archived'
+                                                ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
                                             }`}>
                                             {course.status}
                                         </span>
                                     </div>
 
-                                    {/* Content */}
+                                    {/* Content - Right Side */}
                                     <div className="flex flex-1 flex-col p-5">
-                                        <h3 className="font-semibold text-lg line-clamp-2 mb-2">
-                                            {course.title}
-                                        </h3>
-                                        {course.description && (
-                                            <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                                                {course.description}
-                                            </p>
-                                        )}
-
-                                        {/* Stats */}
-                                        <div className="grid grid-cols-3 gap-3 mb-4 py-3 border-y border-border">
-                                            <div className="text-center">
-                                                <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
-                                                    <BookOpen className="h-4 w-4" />
-                                                </div>
-                                                <div className="font-semibold">{course.modules_count}</div>
-                                                <div className="text-xs text-muted-foreground">Modules</div>
+                                        <div className="flex justify-between items-start gap-4 mb-2">
+                                            <div>
+                                                <h3 className="font-semibold text-lg line-clamp-1 mb-1">
+                                                    {course.title}
+                                                </h3>
+                                                {course.description && (
+                                                    <p className="text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1 max-w-2xl">
+                                                        {course.description.length > 100
+                                                            ? `${course.description.substring(0, 100)}...`
+                                                            : course.description}
+                                                    </p>
+                                                )}
                                             </div>
-                                            <div className="text-center">
-                                                <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
-                                                    <Video className="h-4 w-4" />
-                                                </div>
-                                                <div className="font-semibold">{course.lessons_count}</div>
-                                                <div className="text-xs text-muted-foreground">Lessons</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">
-                                                    <Users className="h-4 w-4" />
-                                                </div>
-                                                <div className="font-semibold">{course.students_count}</div>
-                                                <div className="text-xs text-muted-foreground">Students</div>
-                                            </div>
-                                        </div>
-
-                                        {/* Price & Level */}
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="text-lg font-bold">
-                                                {parseFloat(course.price) === 0 ? 'Free' : `$${course.price}`}
-                                            </div>
-                                            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${course.level === 'beginner'
-                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-transparent'
-                                                    : course.level === 'intermediate'
-                                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-transparent'
-                                                        : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-transparent'
+                                            <span className={`hidden sm:inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold shrink-0 ${course.level === 'beginner'
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-transparent'
+                                                : course.level === 'intermediate'
+                                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-transparent'
+                                                    : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-transparent'
                                                 }`}>
                                                 {course.level}
                                             </span>
                                         </div>
 
-                                        {/* Actions */}
-                                        <div className="flex gap-2 mt-auto">
-                                            <Link
-                                                href={`/instructor/courses/${course.id}/builder`}
-                                                className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-center text-sm font-medium"
-                                            >
-                                                Manage Content
-                                            </Link>
-                                            <Link
-                                                href={`/instructor/courses/${course.id}/edit`}
-                                                className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 text-center"
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Link>
+                                        {/* Stats */}
+                                        <div className="flex items-center gap-6 text-sm text-muted-foreground my-3">
+                                            <div className="flex items-center gap-1.5">
+                                                <BookOpen className="h-4 w-4" />
+                                                <span>{course.modules_count} Modules</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <Video className="h-4 w-4" />
+                                                <span>{course.lessons_count} Lessons</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <Users className="h-4 w-4" />
+                                                <span>{course.students_count} Students</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-auto flex items-center justify-between pt-4 border-t border-border/50">
+                                            <div className="font-bold text-lg">
+                                                {parseFloat(course.price) === 0 ? 'Free' : `${course.price} DZD`}
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                                <Link
+                                                    href={`/instructor/courses/${course.id}/builder`}
+                                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm font-medium"
+                                                >
+                                                    Manage Content
+                                                </Link>
+                                                <Link
+                                                    href={`/instructor/courses/${course.id}/students`}
+                                                    className="p-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+                                                    title="View Students"
+                                                >
+                                                    <Users className="h-4 w-4" />
+                                                </Link>
+                                                <Link
+                                                    href={`/instructor/courses/${course.id}/edit`}
+                                                    className="p-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+                                                    title="Edit Settings"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -188,8 +191,8 @@ export default function Index({ courses }: IndexProps) {
                                             key={index}
                                             href={link.url}
                                             className={`px-4 py-2 text-sm rounded-md ${link.active
-                                                    ? 'bg-primary text-primary-foreground'
-                                                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                                                 }`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
@@ -206,6 +209,6 @@ export default function Index({ courses }: IndexProps) {
                     </>
                 )}
             </div>
-        </AppLayout>
+        </InstructorLayout>
     );
 }

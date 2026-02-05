@@ -15,40 +15,33 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $adminRole = Role::where('code', 'admin')->first();
-        $instructorRole = Role::where('code', 'instructor')->first();
         $studentRole = Role::where('code', 'student')->first();
 
-        // Admin
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'role_id' => $adminRole->id,
-        ]);
+        // Create Admin User
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'password_plaintext' => 'password',
+                'role_id' => $adminRole->id,
+            ]
+        );
 
-        // Instructor
-        User::factory()->create([
-            'name' => 'Instructor User',
-            'email' => 'instructor@example.com',
-            'password' => Hash::make('password'),
-            'role_id' => $instructorRole->id,
-        ]);
+        // Create Student User
+        User::firstOrCreate(
+            ['email' => 'student@example.com'],
+            [
+                'name' => 'Student User',
+                'password' => Hash::make('password'),
+                'password_plaintext' => 'password',
+                'role_id' => $studentRole->id,
+            ]
+        );
 
-        // Student
-        User::factory()->create([
-            'name' => 'Student User',
-            'email' => 'student@example.com',
-            'password' => Hash::make('password'),
+        // Create some random students
+        User::factory()->count(10)->create([
             'role_id' => $studentRole->id,
-        ]);
-
-        // Random users
-        User::factory(10)->create([
-            'role_id' => $studentRole->id,
-        ]);
-
-        User::factory(5)->create([
-            'role_id' => $instructorRole->id,
         ]);
     }
 }

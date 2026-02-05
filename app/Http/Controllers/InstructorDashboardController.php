@@ -34,7 +34,7 @@ class InstructorDashboardController extends Controller
                 return $course;
             });
 
-        return Inertia::render('Instructor/Dashboard', [
+        return Inertia::render('instructor/dashboard', [
             'courses' => $courses,
         ]);
     }

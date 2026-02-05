@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import AdminLayout from '@/pages/admin/admin-layout';
 import {
     Table,
     TableBody,
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2 } from 'lucide-react';
 import { PaginatedResponse, User } from '@/types';
+import Pagination from '@/components/pagination';
 
 interface UsersIndexProps {
     users: PaginatedResponse<User>;
@@ -79,6 +80,7 @@ export default function UsersIndex({ users }: UsersIndexProps) {
                         </TableBody>
                     </Table>
                 </div>
+                <Pagination links={users.links} />
             </div>
         </AdminLayout>
     );

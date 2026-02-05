@@ -54,7 +54,8 @@ class CourseController extends Controller
         $data['status'] = 'draft'; // Always start as draft
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $path = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $data['thumbnail'] = config('app.url') . '/storage/' . $path;
         }
 
         $course = Course::create($data);
@@ -116,7 +117,8 @@ class CourseController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $path = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $data['thumbnail'] = config('app.url') . '/storage/' . $path;
         }
 
         $course->update($data);
@@ -135,5 +137,35 @@ class CourseController extends Controller
 
         return redirect()->route('instructor.courses.index')
             ->with('success', 'Course deleted successfully.');
+    }
+
+    public function students(Course $course)
+    {
+        if (! auth()->user()->hasRole('admin')) {
+            abort_unless($course->creator_id === auth()->id(), 403);
+        }
+
+        $totalLessons = $course->lessons()->count();
+
+        $students = $course->students()
+            ->withPivot('enrolled_at')
+            ->select('users.*')
+            ->paginate(10)
+            ->through(function ($student) use ($course) {
+                $student->completed_lessons_count = $student->lessonProgress()
+                    ->whereHas('lesson.module', function ($q) use ($course) {
+                        $q->where('course_id', $course->id);
+                    })
+                    ->where('is_completed', true)
+                    ->count();
+
+                return $student;
+            });
+
+        return Inertia::render('instructor/courses/students', [
+            'course' => $course,
+            'students' => $students,
+            'totalLessons' => $totalLessons,
+        ]);
     }
 }

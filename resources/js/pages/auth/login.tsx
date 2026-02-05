@@ -9,7 +9,6 @@ import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
-import { request } from '@/routes/password';
 
 type Props = {
     status?: string;
@@ -57,7 +56,7 @@ export default function Login({
                                     <Label htmlFor="password">Password</Label>
                                     {canResetPassword && (
                                         <TextLink
-                                            href={request()}
+                                            // href={request()}
                                             className="ml-auto text-sm"
                                             tabIndex={5}
                                         >
@@ -75,15 +74,6 @@ export default function Login({
                                     placeholder="Password"
                                 />
                                 <InputError message={errors.password} />
-                            </div>
-
-                            <div className="flex items-center space-x-3">
-                                <Checkbox
-                                    id="remember"
-                                    name="remember"
-                                    tabIndex={3}
-                                />
-                                <Label htmlFor="remember">Remember me</Label>
                             </div>
 
                             <Button

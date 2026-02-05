@@ -1,5 +1,5 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import AdminLayout from '@/layouts/admin-layout';
+import AdminLayout from '@/pages/admin/admin-layout';
 import { useState } from 'react';
 import { Plus, GripVertical, Trash2, Video, FileText, CheckCircle2 } from 'lucide-react';
 import type { BreadcrumbItem, Course as BaseCourse } from '@/types';

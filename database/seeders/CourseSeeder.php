@@ -2,12 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Module;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class CourseSeeder extends Seeder
 {
@@ -16,26 +17,43 @@ class CourseSeeder extends Seeder
      */
     public function run(): void
     {
-        $instructorRole = Role::where('code', 'instructor')->first();
-
-        // Get instructors or create some if none exist (though UserSeeder should have handled it)
-        $instructors = User::where('role_id', $instructorRole->id)->get();
-
-        if ($instructors->isEmpty()) {
-            $instructors = User::factory(3)->create(['role_id' => $instructorRole->id]);
+        // Get Admin User
+        $admin = User::where('email', 'admin@example.com')->first();
+        if (! $admin) {
+            // Fallback if admin wasn't created (though UserSeeder should have run)
+            return;
         }
 
-        foreach ($instructors as $instructor) {
-            // Create 5 courses for each instructor
-            $courses = Course::factory(5)->create(['creator_id' => $instructor->id]);
+        // Create Categories
+        $categories = ['Development', 'Business', 'Finance', 'Design', 'Marketing'];
+        $categoryModels = [];
+
+        foreach ($categories as $categoryName) {
+            $categoryModels[] = Category::firstOrCreate(
+                ['slug' => Str::slug($categoryName)],
+                ['name' => $categoryName]
+            );
+        }
+
+        return;
+
+        // Create Courses
+        foreach ($categoryModels as $category) {
+            $courses = Course::factory()->count(3)->create([
+                'creator_id' => $admin->id,
+                'category_id' => $category->id,
+                'status' => 'published',
+            ]);
 
             foreach ($courses as $course) {
-                // Create 3-6 modules per course
-                $modules = Module::factory(random_int(3, 6))->create(['course_id' => $course->id]);
+                // Create Modules
+                $modules = Module::factory()->count(4)->create([
+                    'course_id' => $course->id,
+                ]);
 
                 foreach ($modules as $module) {
-                    // Create 3-8 lessons per module
-                    Lesson::factory(random_int(3, 8))->create([
+                    // Create Lessons
+                    Lesson::factory()->count(5)->create([
                         'module_id' => $module->id,
                     ]);
                 }

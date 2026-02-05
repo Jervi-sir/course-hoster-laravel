@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Order;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -16,28 +15,32 @@ class OrderSeeder extends Seeder
      */
     public function run(): void
     {
-        $studentRole = Role::where('code', 'student')->first();
-        $students = User::where('role_id', $studentRole->id)->get();
-        $courses = Course::all();
+        // Get Student Users
+        $students = User::whereHas('role', function ($query) {
+            $query->where('code', 'student');
+        })->get();
 
-        if ($courses->isEmpty() || $students->isEmpty()) {
+        $courses = Course::where('status', 'published')->get();
+
+        if ($students->isEmpty() || $courses->isEmpty()) {
             return;
         }
 
-        // Each student creates 1-3 orders/enrollments
         foreach ($students as $student) {
-            $randomCourses = $courses->random(random_int(1, 3));
+            // Enroll student in 1-3 random courses
+            $randomCourses = $courses->random(min(3, $courses->count()));
 
             foreach ($randomCourses as $course) {
                 // Create Order
                 Order::factory()->create([
                     'user_id' => $student->id,
                     'course_id' => $course->id,
+                    'amount_paid' => $course->price,
                     'status' => 'completed',
                 ]);
 
                 // Create Enrollment
-                Enrollment::factory()->create([
+                Enrollment::firstOrCreate([
                     'user_id' => $student->id,
                     'course_id' => $course->id,
                 ]);

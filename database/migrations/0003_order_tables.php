@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('enrollments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->nullOnDelete();
+            $table->foreignId('course_id')->constrained()->nullOnDelete();
             $table->timestamp('enrolled_at')->useCurrent();
             $table->timestamp('expires_at')->nullable(); // Useful for subscriptions
             $table->boolean('is_active')->default(true);
@@ -24,9 +24,9 @@ return new class extends Migration
         });
         Schema::create('lesson_progress', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('lesson_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade'); // Redundant but fast for queries
+            $table->foreignId('user_id')->constrained()->nullOnDelete();
+            $table->foreignId('lesson_id')->constrained()->nullOnDelete();
+            $table->foreignId('course_id')->constrained()->nullOnDelete(); // Redundant but fast for queries
             $table->boolean('is_completed')->default(false);
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
@@ -36,8 +36,8 @@ return new class extends Migration
         });
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('course_id')->constrained();
+            $table->foreignId('user_id')->constrained()->nullOnDelete();
+            $table->foreignId('course_id')->constrained()->nullOnDelete();
             $table->string('transaction_id')->unique(); // ID from Stripe/Chargily
             $table->decimal('amount_paid', 10, 2);
             $table->string('currency', 3)->default('DZD');

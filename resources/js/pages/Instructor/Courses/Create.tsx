@@ -1,7 +1,8 @@
 import { Head, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Upload } from 'lucide-react';
+import InstructorLayout from '@/pages/instructor/instructor-layout';
+import { Upload, X } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
+import { useState, useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Instructor', href: '/instructor/courses' },
@@ -18,13 +19,27 @@ export default function Create() {
         thumbnail: null as File | null,
     });
 
+    const [preview, setPreview] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!data.thumbnail) {
+            setPreview(null);
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(data.thumbnail);
+        setPreview(objectUrl);
+
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [data.thumbnail]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/instructor/courses');
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <InstructorLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Course" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6 max-w-4xl mx-auto">
                 <div>
@@ -129,18 +144,52 @@ export default function Create() {
                             <label className="block text-sm font-medium mb-2">
                                 Upload Thumbnail Image
                             </label>
-                            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-                                <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
-                                    onChange={e => setData('thumbnail', e.target.files?.[0] || null)}
-                                />
-                                <p className="text-xs text-muted-foreground mt-2">
-                                    Recommended: 1280x720px, max 2MB
-                                </p>
-                            </div>
+
+                            {preview ? (
+                                <div className="relative mt-2 rounded-lg border border-border overflow-hidden group">
+                                    <img
+                                        src={preview}
+                                        alt="Course thumbnail preview"
+                                        className="w-full aspect-video object-cover"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setData('thumbnail', null)}
+                                        className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                        title="Remove image"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                                    <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            id="thumbnail-upload"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            onChange={e => {
+                                                if (e.target.files?.[0]) {
+                                                    setData('thumbnail', e.target.files[0]);
+                                                }
+                                            }}
+                                        />
+                                        <label
+                                            htmlFor="thumbnail-upload"
+                                            className="cursor-pointer font-semibold text-primary hover:text-primary/80"
+                                        >
+                                            Click to upload
+                                        </label>
+                                        <span className="text-muted-foreground ml-1">or drag and drop</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        Recommended: 1280x720px, max 2MB
+                                    </p>
+                                </div>
+                            )}
+
                             {errors.thumbnail && (
                                 <p className="text-red-500 text-sm mt-1">{errors.thumbnail}</p>
                             )}
@@ -172,6 +221,7 @@ export default function Create() {
                     </p>
                 </div>
             </div>
-        </AppLayout>
+        </InstructorLayout>
     );
 }
+

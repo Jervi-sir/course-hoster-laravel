@@ -43,7 +43,8 @@ class CourseController extends Controller
         $data['status'] = $request->input('status', 'draft');
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $path = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $data['thumbnail'] = config('app.url') . '/storage/' . $path;
         }
 
         $course = Course::create($data);
@@ -112,7 +113,8 @@ class CourseController extends Controller
         }
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $path = $request->file('thumbnail')->store('courses/thumbnails', 'public');
+            $data['thumbnail'] = config('app.url') . '/storage/' . $path;
         }
 
         $course->update($data);

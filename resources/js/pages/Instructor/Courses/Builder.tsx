@@ -1,8 +1,14 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import InstructorLayout from '@/pages/instructor/instructor-layout';
 import { useState } from 'react';
-import { Plus, GripVertical, Pencil, Trash2, Video, FileText, Upload, CheckCircle2 } from 'lucide-react';
+import { Plus, GripVertical, Pencil, Trash2, Video, FileText, Upload, CheckCircle2, Play, X } from 'lucide-react';
+import { MediaPlayer, MediaProvider } from '@vidstack/react';
+import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default';
+import '@vidstack/react/player/styles/default/theme.css';
+import '@vidstack/react/player/styles/default/layouts/video.css';
 import type { BreadcrumbItem } from '@/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 
 interface Lesson {
     id: number;
@@ -41,8 +47,9 @@ interface BuilderProps {
 
 export default function Builder({ course }: BuilderProps) {
     const [expandedModules, setExpandedModules] = useState<number[]>([]);
-    const [editingModule, setEditingModule] = useState<number | null>(null);
-    const [editingLesson, setEditingLesson] = useState<{ moduleId: number; lessonId: number } | null>(null);
+    const [previewLesson, setPreviewLesson] = useState<Lesson | null>(null);
+    const [videoSource, setVideoSource] = useState<'upload' | 'url'>('upload');
+    const [videoPreview, setVideoPreview] = useState<string | null>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Instructor', href: '/instructor/courses' },
@@ -88,7 +95,8 @@ export default function Builder({ course }: BuilderProps) {
             preserveScroll: true,
             onSuccess: () => {
                 lessonForm.reset();
-                setEditingLesson(null);
+                setVideoSource('upload');
+                setVideoPreview(null);
             },
         });
     };
@@ -112,7 +120,7 @@ export default function Builder({ course }: BuilderProps) {
     const totalLessons = course.modules.reduce((sum, module) => sum + module.lessons.length, 0);
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <InstructorLayout breadcrumbs={breadcrumbs}>
             <Head title={`Build: ${course.title}`} />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
                 {/* Header */}
@@ -128,8 +136,8 @@ export default function Builder({ course }: BuilderProps) {
                             {course.modules.length} modules • {totalLessons} lessons
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${course.status === 'published'
-                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
                             }`}>
                             {course.status}
                         </span>
@@ -209,7 +217,7 @@ export default function Builder({ course }: BuilderProps) {
                                         <div className="bg-muted/30 rounded-lg p-4">
                                             <h4 className="font-medium mb-3">Add Lesson to this Module</h4>
                                             <form onSubmit={(e) => handleAddLesson(module.id, e)} className="space-y-3">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div className="grid grid-cols-1 gap-3">
                                                     <input
                                                         type="text"
                                                         placeholder="Lesson title"
@@ -218,37 +226,126 @@ export default function Builder({ course }: BuilderProps) {
                                                         onChange={e => lessonForm.setData('title', e.target.value)}
                                                         required
                                                     />
-                                                    <select
-                                                        className="px-4 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                                                        value={lessonForm.data.type}
-                                                        onChange={e => lessonForm.setData('type', e.target.value as any)}
-                                                    >
-                                                        <option value="video">Video</option>
-                                                        <option value="article">Article</option>
-                                                        <option value="quiz">Quiz</option>
-                                                        <option value="file">File</option>
-                                                    </select>
+
+                                                    <div className="flex gap-4">
+                                                        <select
+                                                            className="px-4 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring w-40"
+                                                            value={lessonForm.data.type}
+                                                            onChange={e => lessonForm.setData('type', e.target.value as any)}
+                                                        >
+                                                            <option value="video">Video</option>
+                                                            <option value="article">Article</option>
+                                                            <option value="quiz">Quiz</option>
+                                                            <option value="file">File</option>
+                                                        </select>
+
+                                                        <input
+                                                            type="number"
+                                                            placeholder="Duration (min)"
+                                                            className="w-48 px-4 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                                                            value={lessonForm.data.duration_minutes || ''}
+                                                            onChange={e => lessonForm.setData('duration_minutes', parseInt(e.target.value) || 0)}
+                                                            min="0"
+                                                        />
+
+                                                        <label className="flex items-center gap-2 cursor-pointer border border-border px-3 rounded-md bg-background hover:bg-accent/50">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="rounded border-border"
+                                                                checked={lessonForm.data.is_preview}
+                                                                onChange={e => lessonForm.setData('is_preview', e.target.checked)}
+                                                            />
+                                                            <span className="text-sm">Free Preview</span>
+                                                        </label>
+                                                    </div>
                                                 </div>
 
                                                 {lessonForm.data.type === 'video' && (
-                                                    <div className="space-y-2">
-                                                        <label className="block text-sm font-medium">
-                                                            Upload Video or Enter URL
-                                                        </label>
-                                                        <input
-                                                            type="file"
-                                                            accept="video/*"
-                                                            className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                                                            onChange={e => lessonForm.setData('video', e.target.files?.[0] || null)}
-                                                        />
-                                                        <div className="text-center text-sm text-muted-foreground">or</div>
-                                                        <input
-                                                            type="url"
-                                                            placeholder="Video URL (YouTube, Vimeo, etc.)"
-                                                            className="w-full px-4 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                                                            value={lessonForm.data.video_url}
-                                                            onChange={e => lessonForm.setData('video_url', e.target.value)}
-                                                        />
+                                                    <div className="space-y-3 border border-border rounded-md p-3 bg-background">
+                                                        <div className="flex gap-4 border-b border-border pb-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setVideoSource('upload');
+                                                                    lessonForm.setData('video_url', '');
+                                                                }}
+                                                                className={`text-sm font-medium pb-1 transition-colors ${videoSource === 'upload'
+                                                                    ? 'text-primary border-b-2 border-primary'
+                                                                    : 'text-muted-foreground hover:text-foreground'}`}
+                                                            >
+                                                                Upload Video
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setVideoSource('url');
+                                                                    lessonForm.setData('video', null);
+                                                                    setVideoPreview(null);
+                                                                }}
+                                                                className={`text-sm font-medium pb-1 transition-colors ${videoSource === 'url'
+                                                                    ? 'text-primary border-b-2 border-primary'
+                                                                    : 'text-muted-foreground hover:text-foreground'}`}
+                                                            >
+                                                                External URL
+                                                            </button>
+                                                        </div>
+
+                                                        {videoSource === 'upload' ? (
+                                                            <div className="space-y-3">
+                                                                <input
+                                                                    type="file"
+                                                                    accept="video/*"
+                                                                    className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                                                                    onChange={e => {
+                                                                        const file = e.target.files?.[0] || null;
+                                                                        lessonForm.setData('video', file);
+                                                                        if (file) {
+                                                                            setVideoPreview(URL.createObjectURL(file));
+                                                                        } else {
+                                                                            setVideoPreview(null);
+                                                                        }
+                                                                    }}
+                                                                />
+
+                                                                {videoPreview && (
+                                                                    <div className="relative rounded-md overflow-hidden bg-black aspect-video">
+                                                                        <video
+                                                                            src={videoPreview}
+                                                                            controls
+                                                                            className="w-full h-full"
+                                                                        />
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                lessonForm.setData('video', null);
+                                                                                setVideoPreview(null);
+                                                                            }}
+                                                                            className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70"
+                                                                        >
+                                                                            <X className="h-4 w-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+
+                                                                {lessonForm.progress && (
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                                                            <span>Uploading...</span>
+                                                                            <span>{lessonForm.progress.percentage}%</span>
+                                                                        </div>
+                                                                        <Progress value={lessonForm.progress.percentage} className="h-2" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <input
+                                                                type="url"
+                                                                placeholder="Video URL (YouTube, Vimeo, etc.)"
+                                                                className="w-full px-4 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                                                                value={lessonForm.data.video_url}
+                                                                onChange={e => lessonForm.setData('video_url', e.target.value)}
+                                                            />
+                                                        )}
                                                     </div>
                                                 )}
 
@@ -261,33 +358,19 @@ export default function Builder({ course }: BuilderProps) {
                                                     />
                                                 )}
 
-                                                <div className="flex items-center gap-4">
-                                                    <label className="flex items-center gap-2 cursor-pointer">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="rounded border-border"
-                                                            checked={lessonForm.data.is_preview}
-                                                            onChange={e => lessonForm.setData('is_preview', e.target.checked)}
-                                                        />
-                                                        <span className="text-sm">Free preview</span>
-                                                    </label>
-                                                    <input
-                                                        type="number"
-                                                        placeholder="Duration (minutes)"
-                                                        className="w-32 px-4 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                                                        value={lessonForm.data.duration_minutes || ''}
-                                                        onChange={e => lessonForm.setData('duration_minutes', parseInt(e.target.value) || 0)}
-                                                        min="0"
-                                                    />
-                                                </div>
-
                                                 <button
                                                     type="submit"
                                                     disabled={lessonForm.processing}
-                                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2 text-sm font-medium"
+                                                    className="w-full sm:w-auto px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 text-sm font-medium active:scale-95 transition-transform"
                                                 >
-                                                    <Plus className="h-4 w-4" />
-                                                    Add Lesson
+                                                    {lessonForm.processing ? (
+                                                        <>Uploading...</>
+                                                    ) : (
+                                                        <>
+                                                            <Plus className="h-4 w-4" />
+                                                            Add Lesson
+                                                        </>
+                                                    )}
                                                 </button>
                                             </form>
                                         </div>
@@ -302,14 +385,17 @@ export default function Builder({ course }: BuilderProps) {
                                                 {module.lessons.map((lesson, lessonIndex) => (
                                                     <div
                                                         key={lesson.id}
-                                                        className="flex items-center gap-3 p-3 bg-background border border-border rounded-md hover:border-primary/50 transition-colors"
+                                                        className="group flex items-center gap-3 p-3 bg-background border border-border rounded-md hover:border-primary/50 transition-colors"
                                                     >
                                                         <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                                                        <div className="flex-1">
+                                                        <div
+                                                            className="flex-1 cursor-pointer"
+                                                            onClick={() => setPreviewLesson(lesson)}
+                                                        >
                                                             <div className="flex items-center gap-2">
                                                                 {lesson.type === 'video' && <Video className="h-4 w-4 text-primary" />}
                                                                 {lesson.type === 'article' && <FileText className="h-4 w-4 text-blue-500" />}
-                                                                <span className="font-medium">
+                                                                <span className="font-medium group-hover:text-primary transition-colors">
                                                                     {lessonIndex + 1}. {lesson.title}
                                                                 </span>
                                                                 {lesson.is_preview && (
@@ -324,8 +410,16 @@ export default function Builder({ course }: BuilderProps) {
                                                             </div>
                                                         </div>
                                                         <button
+                                                            onClick={() => setPreviewLesson(lesson)}
+                                                            className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md"
+                                                            title="Preview"
+                                                        >
+                                                            <Play className="h-4 w-4" />
+                                                        </button>
+                                                        <button
                                                             onClick={() => handleDeleteLesson(module.id, lesson.id)}
                                                             className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
+                                                            title="Delete"
                                                         >
                                                             <Trash2 className="h-4 w-4" />
                                                         </button>
@@ -356,13 +450,22 @@ export default function Builder({ course }: BuilderProps) {
                             >
                                 Back to Courses
                             </a>
+                            <a
+                                href={`/instructor/courses/${course.id}/students`}
+                                className="px-6 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 font-medium"
+                            >
+                                View Students
+                            </a>
                             {course.status === 'draft' && totalLessons > 0 && (
                                 <button
                                     onClick={() => {
                                         router.put(`/instructor/courses/${course.id}`, {
-                                            ...course,
+                                            title: course.title,
+                                            description: course.description,
+                                            price: course.price,
+                                            level: course.level,
                                             status: 'published',
-                                        });
+                                        } as any);
                                     }}
                                     className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium flex items-center gap-2"
                                 >
@@ -374,6 +477,56 @@ export default function Builder({ course }: BuilderProps) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+
+            {/* Preview Modal */}
+            <Dialog open={!!previewLesson} onOpenChange={(open) => !open && setPreviewLesson(null)}>
+                <DialogContent className="sm:max-w-2xl px-2 sm:px-6">
+                    {/*  Modified padding for mobile friendliness if needed, ensuring DialogContent props are standard */}
+                    <DialogHeader>
+                        <DialogTitle>{previewLesson?.title}</DialogTitle>
+                        <DialogDescription>
+                            {previewLesson?.type === 'video' ? 'Video Lesson Preview' : 'Lesson Content Preview'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4">
+                        {previewLesson?.type === 'video' ? (
+                            previewLesson.video_url ? (
+                                <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                                    {previewLesson.video_url.includes('youtube.com') || previewLesson.video_url.includes('youtu.be') ? (
+                                        <iframe
+                                            src={previewLesson.video_url.replace('watch?v=', 'embed/')}
+                                            className="w-full h-full"
+                                            allowFullScreen
+                                        />
+                                    ) : (
+                                        <MediaPlayer
+                                            src={previewLesson.video_url}
+                                            viewType="video"
+                                            streamType="on-demand"
+                                            logLevel="warn"
+                                            crossOrigin
+                                            playsInline
+                                            title={previewLesson.title}
+                                            className="w-full h-full aspect-video bg-black rounded-lg overflow-hidden" // ensure size and rounding
+                                        >
+                                            <MediaProvider />
+                                            <DefaultVideoLayout icons={defaultLayoutIcons} />
+                                        </MediaPlayer>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="p-8 text-center bg-muted rounded-lg">
+                                    No video URL available
+                                </div>
+                            )
+                        ) : (
+                            <div className="prose dark:prose-invert max-w-none">
+                                {previewLesson?.content}
+                            </div>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </InstructorLayout>
     );
 }

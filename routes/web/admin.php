@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified', 'role:instructor,admin'])->prefix('instructor')->as('instructor.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('instructor')->as('instructor.')->group(function () {
     // Course Management
     Route::get('/courses', [\App\Http\Controllers\Instructor\CourseController::class, 'index'])->name('courses.index');
     Route::get('/courses/create', [\App\Http\Controllers\Instructor\CourseController::class, 'create'])->name('courses.create');
@@ -10,6 +10,7 @@ Route::middleware(['auth', 'verified', 'role:instructor,admin'])->prefix('instru
     Route::get('/courses/{course}/builder', [\App\Http\Controllers\Instructor\CourseController::class, 'builder'])->name('courses.builder');
     Route::get('/courses/{course}/edit', [\App\Http\Controllers\Instructor\CourseController::class, 'edit'])->name('courses.edit');
     Route::put('/courses/{course}', [\App\Http\Controllers\Instructor\CourseController::class, 'update'])->name('courses.update');
+    Route::get('/courses/{course}/students', [\App\Http\Controllers\Instructor\CourseController::class, 'students'])->name('courses.students');
     Route::delete('/courses/{course}', [\App\Http\Controllers\Instructor\CourseController::class, 'destroy'])->name('courses.destroy');
 
     // Module Management
