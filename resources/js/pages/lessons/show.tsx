@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';
 import { MessageSquareDashed } from 'lucide-react';
@@ -153,13 +153,13 @@ export default function LessonShow({ course, lesson, isCompleted }: LessonShowPr
                                 ) : (
                                     (lesson.video_url || lesson.video_hls_path) ? (
                                         <div
-                                            className='w-full h-full'
+                                            className='relative w-full h-full'
                                             onContextMenu={(e) => e.preventDefault()} // Prevent context menu
                                         >
                                             <MediaPlayer
                                                 title={lesson.title}
                                                 src={lesson.video_hls_path && lesson.video_processing_status === 'completed'
-                                                    ? `/storage/${lesson.video_hls_path}`
+                                                    ? `/video-stream/${lesson.id}/playlist.m3u8`
                                                     : lesson.video_url
                                                 }
                                                 viewType="video"
@@ -167,9 +167,19 @@ export default function LessonShow({ course, lesson, isCompleted }: LessonShowPr
                                                 logLevel="warn"
                                                 crossOrigin
                                                 playsInline
+                                                load="visible"
                                                 className="w-full h-full aspect-video bg-black rounded-lg overflow-hidden"
                                             >
-                                                <MediaProvider />
+                                                <MediaProvider
+                                                    onProviderSetup={(provider) => {
+                                                        if (provider.type === 'hls') {
+                                                            provider.config = {
+                                                                maxBufferLength: 30, // Keep only 30s in buffer
+                                                                maxMaxBufferLength: 60, // Max buffer size
+                                                            };
+                                                        }
+                                                    }}
+                                                />
                                                 <DefaultVideoLayout icons={defaultLayoutIcons} />
                                             </MediaPlayer>
                                         </div>

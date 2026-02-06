@@ -32,6 +32,6 @@ require __DIR__ . '/web/admin.php';
 require __DIR__ . '/settings.php';
 
 
-Route::get('/video-stream/{path}', [VideoStreamController::class, 'stream'])
-    ->where('path', '.*')
+Route::get('/video-stream/{lesson}/{filename}', [VideoStreamController::class, 'stream'])
+    ->middleware(['auth', 'verified'])
     ->name('video.stream');

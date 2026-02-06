@@ -500,7 +500,10 @@ export default function Builder({ course }: BuilderProps) {
                                         />
                                     ) : (
                                         <MediaPlayer
-                                            src={previewLesson.video_url}
+                                            src={previewLesson.video_url.includes('/storage/courses/hls/')
+                                                ? `/video-stream/${previewLesson.id}/playlist.m3u8`
+                                                : previewLesson.video_url
+                                            }
                                             viewType="video"
                                             streamType="on-demand"
                                             logLevel="warn"

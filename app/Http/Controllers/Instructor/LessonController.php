@@ -43,7 +43,7 @@ class LessonController extends Controller
         $videoPath = null;
         if ($request->hasFile('video')) {
             $videoPath = $request->file('video')->store('courses/videos', 'public');
-            $data['video_url'] = route('video.stream', ['path' => $videoPath]);
+            $data['video_url'] = null;
             $data['video_provider'] = 'local';
             unset($data['video']); // Remove the file from data array
         }
@@ -88,7 +88,7 @@ class LessonController extends Controller
         $videoPath = null;
         if ($request->hasFile('video')) {
             $videoPath = $request->file('video')->store('courses/videos', 'public');
-            $data['video_url'] = route('video.stream', ['path' => $videoPath]);
+            $data['video_url'] = null;
             $data['video_provider'] = 'local';
             unset($data['video']); // Remove the file from data array
         }
