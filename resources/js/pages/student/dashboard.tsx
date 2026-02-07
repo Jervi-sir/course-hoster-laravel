@@ -8,10 +8,11 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { BookOpen, CheckCircle } from 'lucide-react';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import StudentLayout from './layouts/student-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'My Courses',
         href: dashboard().url,
     },
 ];
@@ -35,44 +36,44 @@ export default function Dashboard({ courses }: DashboardProps) {
     });
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <StudentLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h2 className="text-2xl font-bold">My Courses</h2>
+
+
+                    <div className="flex space-x-1 rounded-lg bg-muted p-1 w-fit">
+                        <button
+                            onClick={() => setActiveTab('in_progress')}
+                            className={cn(
+                                "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                activeTab === 'in_progress'
+                                    ? "bg-background text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                            )}
+                        >
+                            <BookOpen className="h-4 w-4" />
+                            In Progress
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('completed')}
+                            className={cn(
+                                "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                activeTab === 'completed'
+                                    ? "bg-background text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                            )}
+                        >
+                            <CheckCircle className="h-4 w-4" />
+                            Completed
+                        </button>
+                    </div>
                     <Link
                         href="/courses"
                         className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
                     >
                         Browse Courses
                     </Link>
-                </div>
-
-                <div className="flex space-x-1 rounded-lg bg-muted p-1 w-fit">
-                    <button
-                        onClick={() => setActiveTab('in_progress')}
-                        className={cn(
-                            "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                            activeTab === 'in_progress'
-                                ? "bg-background text-foreground shadow-sm"
-                                : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
-                        )}
-                    >
-                        <BookOpen className="h-4 w-4" />
-                        In Progress
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('completed')}
-                        className={cn(
-                            "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                            activeTab === 'completed'
-                                ? "bg-background text-foreground shadow-sm"
-                                : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
-                        )}
-                    >
-                        <CheckCircle className="h-4 w-4" />
-                        Completed
-                    </button>
                 </div>
 
                 {filteredCourses.length === 0 ? (
@@ -169,6 +170,6 @@ export default function Dashboard({ courses }: DashboardProps) {
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </StudentLayout>
     );
 }

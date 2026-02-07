@@ -4,10 +4,11 @@ import { FavoriteButton } from '@/components/favorite-button';
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import type { BreadcrumbItem, Course, PaginatedResponse } from '@/types';
+import StudentLayout from '../layouts/student-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Courses',
+        title: 'Browse Courses',
         href: '/courses',
     },
 ];
@@ -60,19 +61,10 @@ export default function CoursesIndex({ courses, categories, filters }: CoursesIn
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <StudentLayout breadcrumbs={breadcrumbs} subInfo="Explore our wide range of courses and start learning today.">
             <Head title="Browse Courses" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                    <div>
-                        <h2 className="text-2xl font-bold">Browse Courses</h2>
-                        <p className="text-muted-foreground text-sm mt-1">
-                            Explore our wide range of courses and start learning today.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row gap-4 mb-0">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <input
@@ -117,7 +109,7 @@ export default function CoursesIndex({ courses, categories, filters }: CoursesIn
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {courses.data.map((course) => (
                             <div key={course.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md">
-                                <FavoriteButton course={course} className="absolute top-2 right-2 z-20" />
+                                {/* <FavoriteButton course={course} className="absolute top-2 right-2 z-20" /> */}
                                 <Link href={`/courses/${course.slug}`} className="absolute inset-0 z-10">
                                     <span className="sr-only">View course</span>
                                 </Link>
@@ -149,8 +141,8 @@ export default function CoursesIndex({ courses, categories, filters }: CoursesIn
                                             {parseFloat(course.price) === 0 ? 'Free' : `$${course.price}`}
                                         </div>
                                         <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent ${course.level === 'beginner' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                                course.level === 'intermediate' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                                                    'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+                                            course.level === 'intermediate' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
                                             }`}>
                                             {course.level}
                                         </span>
@@ -183,6 +175,6 @@ export default function CoursesIndex({ courses, categories, filters }: CoursesIn
                     </div>
                 )}
             </div>
-        </AppLayout>
+        </StudentLayout>
     );
 }

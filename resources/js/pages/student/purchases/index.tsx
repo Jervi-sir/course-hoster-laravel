@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileText, Calendar, CreditCard, ExternalLink } from 'lucide-react';
+import StudentLayout from '../layouts/student-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,16 +20,9 @@ interface PurchasesIndexProps {
 
 export default function PurchasesIndex({ orders }: PurchasesIndexProps) {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <StudentLayout breadcrumbs={breadcrumbs} subInfo="View your past orders and download invoices.">
             <Head title="Purchase History" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4 md:p-6">
-                <div className="flex flex-col gap-2">
-                    <h2 className="text-2xl font-bold tracking-tight">Purchase History</h2>
-                    <p className="text-muted-foreground">
-                        View your past orders and download invoices.
-                    </p>
-                </div>
-
                 <div className="flex flex-1 flex-col">
                     {orders.data.length === 0 ? (
                         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
@@ -124,6 +118,6 @@ export default function PurchasesIndex({ orders }: PurchasesIndexProps) {
                     )}
                 </div>
             </div>
-        </AppLayout>
+        </StudentLayout>
     );
 }

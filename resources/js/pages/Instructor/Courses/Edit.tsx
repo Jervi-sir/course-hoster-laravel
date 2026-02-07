@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import InstructorLayout from '@/pages/instructor/instructor-layout';
+import InstructorLayout from '@/pages/instructor/layouts/instructor-layout';
 import { Upload } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
 

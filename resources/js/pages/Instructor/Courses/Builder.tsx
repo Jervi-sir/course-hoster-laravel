@@ -1,5 +1,5 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import InstructorLayout from '@/pages/instructor/instructor-layout';
+import InstructorLayout from '@/pages/instructor/layouts/instructor-layout';
 import { useState } from 'react';
 import { Plus, GripVertical, Pencil, Trash2, Video, FileText, Upload, CheckCircle2, Play, X } from 'lucide-react';
 import { MediaPlayer, MediaProvider } from '@vidstack/react';
@@ -7,7 +7,10 @@ import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/l
 import '@vidstack/react/player/styles/default/theme.css';
 import '@vidstack/react/player/styles/default/layouts/video.css';
 import type { BreadcrumbItem } from '@/types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+    Dialog, DialogContent, DialogHeader,
+    DialogTitle, DialogDescription
+} from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 
 interface Lesson {
@@ -16,11 +19,13 @@ interface Lesson {
     slug: string;
     type: 'video' | 'article' | 'quiz' | 'file';
     video_url?: string;
+    video_hls_path?: string;
     content?: string;
     duration_minutes: number;
     is_preview: boolean;
     sort_order: number;
 }
+// ... (keep Module and Course interfaces as they are, I will target the specific blocks separately if needed, but here I can just replace the interface and then the component logic. Actually, better to do two chunks to avoid large replacements)
 
 interface Module {
     id: number;
@@ -490,9 +495,9 @@ export default function Builder({ course }: BuilderProps) {
                     </DialogHeader>
                     <div className="mt-4">
                         {previewLesson?.type === 'video' ? (
-                            previewLesson.video_url ? (
+                            (previewLesson.video_url || previewLesson.video_hls_path) ? (
                                 <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
-                                    {previewLesson.video_url.includes('youtube.com') || previewLesson.video_url.includes('youtu.be') ? (
+                                    {(previewLesson.video_url && (previewLesson.video_url.includes('youtube.com') || previewLesson.video_url.includes('youtu.be'))) ? (
                                         <iframe
                                             src={previewLesson.video_url.replace('watch?v=', 'embed/')}
                                             className="w-full h-full"
@@ -500,9 +505,9 @@ export default function Builder({ course }: BuilderProps) {
                                         />
                                     ) : (
                                         <MediaPlayer
-                                            src={previewLesson.video_url.includes('/storage/courses/hls/')
-                                                ? `/video-stream/${previewLesson.id}/playlist.m3u8`
-                                                : previewLesson.video_url
+                                            src={previewLesson.video_hls_path
+                                                ? `/video-stream/${previewLesson.id}/${previewLesson.id}.m3u8`
+                                                : previewLesson.video_url!
                                             }
                                             viewType="video"
                                             streamType="on-demand"

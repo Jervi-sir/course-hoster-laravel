@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Category;
 use App\Models\Course;
@@ -34,7 +36,7 @@ class CourseController extends Controller
         $courses = $query->latest()->paginate(12)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
-        return Inertia::render('courses/index', [
+        return Inertia::render('student/courses/index', [
             'courses' => $courses,
             'categories' => $categories,
             'filters' => $request->only(['search', 'category']),
@@ -71,7 +73,7 @@ class CourseController extends Controller
             }
         }
 
-        return Inertia::render('courses/show', [
+        return Inertia::render('student/courses/show', [
             'course' => $course,
             'isEnrolled' => $isEnrolled,
             'canReview' => $canReview,

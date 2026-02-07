@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -14,7 +16,7 @@ class PurchaseController extends Controller
             ->latest()
             ->paginate(10);
 
-        return Inertia::render('purchases/index', [
+        return Inertia::render('student/purchases/index', [
             'orders' => $orders,
         ]);
     }

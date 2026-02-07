@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -11,7 +13,7 @@ class DashboardController extends Controller
     public function index()
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         $courses = $user->courses()
             ->with(['creator']) // Eager load creator
@@ -34,7 +36,7 @@ class DashboardController extends Controller
                 return $course;
             });
 
-        return Inertia::render('dashboard', [
+        return Inertia::render('student/dashboard', [
             'courses' => $courses,
         ]);
     }

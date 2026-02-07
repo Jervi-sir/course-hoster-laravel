@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Course;
 use Illuminate\Http\Request;
@@ -11,7 +13,7 @@ class CheckoutController extends Controller
 {
     public function show(Course $course)
     {
-        return Inertia::render('courses/checkout', [
+        return Inertia::render('student/courses/checkout', [
             'course' => $course,
         ]);
     }
@@ -28,7 +30,7 @@ class CheckoutController extends Controller
             'currency' => 'dzd',
             'success_url' => route('payment.success', ['course_id' => $course->id]),
             'failure_url' => route('payment.failure'),
-            'description' => 'Payment for '.$course->title,
+            'description' => 'Payment for ' . $course->title,
             'metadata' => [
                 'course_id' => $course->id,
                 'user_id' => $user->id,

@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import SettingsLayout from '@/layouts/settings/layout';
+import SettingsLayout from '@/pages/settings/layouts/layout';
 import { edit } from '@/routes/user-password';
 import type { BreadcrumbItem } from '@/types';
+import StudentLayout from '../student/layouts/student-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -24,7 +25,7 @@ export default function Password() {
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <StudentLayout breadcrumbs={breadcrumbs}>
             <Head title="Password settings" />
 
             <h1 className="sr-only">Password Settings</h1>
@@ -143,6 +144,6 @@ export default function Password() {
                     </Form>
                 </div>
             </SettingsLayout>
-        </AppLayout>
+        </StudentLayout>
     );
 }

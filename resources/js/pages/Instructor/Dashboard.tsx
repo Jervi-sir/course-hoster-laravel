@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import InstructorLayout from './instructor-layout';
+import InstructorLayout from '@/pages/instructor/layouts/instructor-layout';
 import type { Course, User } from '@/types';
 import { Users } from 'lucide-react';
 

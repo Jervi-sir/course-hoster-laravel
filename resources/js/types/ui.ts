@@ -3,7 +3,10 @@ import type { BreadcrumbItem } from './navigation';
 
 export type AppLayoutProps = {
     children: ReactNode;
-    breadcrumbs?: BreadcrumbItem[];
+    breadcrumbs?: BreadcrumbItem[] | ReactNode;
+    hideHeader?: boolean;
+    header?: ReactNode;
+    subInfo?: ReactNode;
 };
 
 export type AuthLayoutProps = {

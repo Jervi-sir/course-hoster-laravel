@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\Course;
 use App\Models\Lesson;
@@ -67,7 +69,29 @@ class LessonController extends Controller
         $currentProgress = $courseProgress->get($lesson->id);
         $isCompleted = $currentProgress ? $currentProgress->is_completed : false;
 
-        return Inertia::render('lessons/show', [
+        // Generate Signed HLS Path with IP Binding
+        if ($lesson->video_hls_path && $lesson->video_processing_status === 'completed') {
+            // Generate a master playlist endpoint that verifies signature
+            // We'll assume the route name is 'video.stream' (need to verify/create this name)
+            // But wait, the Frontend uses `/video-stream/${lesson.id}/${lesson.id}.m3u8` hardcoded currently.
+            // We should pass the FULL URL to the frontend.
+
+            $masterPlaylistUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'video.stream',
+                now()->addMinutes(180), // 3 hours validity
+                [
+                    'lesson' => $lesson->id,
+                    'filename' => $lesson->id . '.m3u8',
+                    'ip' => request()->ip() // Bind to IP
+                ]
+            );
+
+            // We pass this URL to properties.
+            // But we need to overwrite or add a property.
+            $lesson->secure_hls_url = $masterPlaylistUrl;
+        }
+
+        return Inertia::render('student/lessons/show', [
             'course' => $course,
             'lesson' => $lesson,
             'isCompleted' => $isCompleted,

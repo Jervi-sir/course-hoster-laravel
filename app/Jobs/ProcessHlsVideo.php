@@ -56,10 +56,24 @@ class ProcessHlsVideo implements ShouldQueue
         $bitrate720 = (new X264)->setKiloBitrate(2500)->setAdditionalParameters(['-preset', 'veryfast']);  // ~720p
         $bitrate1080 = (new X264)->setKiloBitrate(4500)->setAdditionalParameters(['-preset', 'veryfast']); // ~1080p
 
-        FFMpeg::fromDisk('public')
+        FFMpeg::fromDisk('local')
             ->open($this->videoPath)
             ->exportForHLS()
             ->toDisk('local') // Save to private storage
+            ->useSegmentFilenameGenerator(function ($name, $format, $key, callable $segments, callable $playlist) use ($hlsDirectory) {
+                $qualities = [
+                    0 => '240p',
+                    1 => '360p',
+                    2 => '480p',
+                    3 => '720p',
+                    4 => '1080p',
+                ];
+                $quality = $qualities[$key] ?? 'video';
+                $id = $this->lesson->id;
+
+                $segments("{$hlsDirectory}/{$id}_{$quality}_%03d.ts");
+                $playlist("{$hlsDirectory}/{$id}_{$quality}.m3u8");
+            })
             ->addFormat($bitrate240, function ($media) {
                 $media->addFilter('scale=426:240');
             })
@@ -75,16 +89,19 @@ class ProcessHlsVideo implements ShouldQueue
             ->addFormat($bitrate1080, function ($media) {
                 $media->addFilter('scale=1920:1080');
             })
-            ->save($hlsPath);
+            ->save($hlsDirectory . "/{$this->lesson->id}.m3u8");
 
         // Get Duration (simple check from original source)
-        $media = FFMpeg::fromDisk('public')->open($this->videoPath);
+        $media = FFMpeg::fromDisk('local')->open($this->videoPath);
         $durationInSeconds = $media->getDurationInSeconds();
 
         $this->lesson->update([
-            'video_hls_path' => $hlsPath,
+            'video_hls_path' => $hlsDirectory . "/{$this->lesson->id}.m3u8",
             'duration_minutes' => round($durationInSeconds / 60),
             'video_processing_status' => 'completed',
         ]);
+
+        // Cleanup: Delete the original video file to save space
+        Storage::disk('local')->delete($this->videoPath);
     }
 }

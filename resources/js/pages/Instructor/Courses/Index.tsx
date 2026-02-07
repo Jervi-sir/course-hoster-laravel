@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import InstructorLayout from '@/pages/instructor/instructor-layout';
+import InstructorLayout from '@/pages/instructor/layouts/instructor-layout';
 import { Plus, BookOpen, Users, Video, Edit, Trash2 } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
 
@@ -38,17 +38,11 @@ interface IndexProps {
 
 export default function Index({ courses }: IndexProps) {
     return (
-        <InstructorLayout breadcrumbs={breadcrumbs}>
+        <InstructorLayout breadcrumbs={breadcrumbs} subInfo="Manage your courses and track student progress" >
             <Head title="My Courses" />
             <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold">My Courses</h1>
-                        <p className="text-muted-foreground mt-1">
-                            Manage your courses and track student progress
-                        </p>
-                    </div>
                     <Link
                         href="/instructor/courses/create"
                         className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium flex items-center gap-2"
@@ -85,7 +79,7 @@ export default function Index({ courses }: IndexProps) {
                                     className="group relative flex flex-col sm:flex-row overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
                                 >
                                     {/* Thumbnail - Left Side */}
-                                    <div className="w-full sm:w-64 aspect-video sm:aspect-auto relative shrink-0">
+                                    <div className="w-full sm:w-64 aspect-video sm:aspect-[16/9] relative shrink-0">
                                         {course.thumbnail ? (
                                             <img
                                                 src={course.thumbnail}

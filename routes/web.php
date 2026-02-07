@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
-use App\Http\Controllers\VideoStreamController;
+use App\Http\Controllers\Student\VideoStreamController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -26,7 +26,7 @@ Route::middleware('guest')->group(function () {
 Route::post('logout', [AuthenticationController::class, 'logout'])->name('logout')->middleware('auth');
 
 require __DIR__ . '/web/auth.php';
-// require __DIR__ . '/web/student.php';
+require __DIR__ . '/web/student.php';
 require __DIR__ . '/web/admin.php';
 
 require __DIR__ . '/settings.php';

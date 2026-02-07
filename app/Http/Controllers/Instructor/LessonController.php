@@ -42,7 +42,7 @@ class LessonController extends Controller
         // Handle video upload if provided
         $videoPath = null;
         if ($request->hasFile('video')) {
-            $videoPath = $request->file('video')->store('courses/videos', 'public');
+            $videoPath = $request->file('video')->store('courses/videos', 'local');
             $data['video_url'] = null;
             $data['video_provider'] = 'local';
             unset($data['video']); // Remove the file from data array
@@ -87,7 +87,7 @@ class LessonController extends Controller
         // Handle video upload if provided
         $videoPath = null;
         if ($request->hasFile('video')) {
-            $videoPath = $request->file('video')->store('courses/videos', 'public');
+            $videoPath = $request->file('video')->store('courses/videos', 'local');
             $data['video_url'] = null;
             $data['video_provider'] = 'local';
             unset($data['video']); // Remove the file from data array

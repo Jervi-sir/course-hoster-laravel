@@ -12,13 +12,13 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import AppLogo from '@/components/app-logo';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
-import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'My Courses',
         href: dashboard(),
         icon: LayoutGrid,
     },
@@ -32,6 +32,9 @@ const mainNavItems: NavItem[] = [
         href: '/purchases',
         icon: CreditCard,
     },
+];
+
+const footerNavItems: NavItem[] = [
     {
         title: 'Settings',
         href: '/settings/profile',
@@ -39,20 +42,7 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
-export function AppSidebar() {
+export function StudentSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -72,8 +62,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
-                <NavUser />
+                <NavFooter items={footerNavItems} className="mt-auto" />     <NavUser />
             </SidebarFooter>
         </Sidebar>
     );
